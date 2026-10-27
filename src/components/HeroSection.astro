@@ -10,7 +10,7 @@ const stageMentors = [
     width: 618,
     height: 600,
     posClass: 'left-[-1.5%] bottom-0 z-20 w-[55%]',
-    hitClass: 'left-[3%] bottom-[4%] z-30 h-[50%] w-[43%]',
+    hitClass: 'left-0 bottom-0 z-30 h-1/2 w-1/2',
     auraPos: 'left: 8%; top: 38%;',
     priority: true,
   },
@@ -24,7 +24,7 @@ const stageMentors = [
     width: 614,
     height: 665,
     posClass: 'left-[5%] top-[1%] z-10 w-[52%]',
-    hitClass: 'left-[8%] top-[3%] z-30 h-[43%] w-[42%]',
+    hitClass: 'left-0 top-0 z-30 h-1/2 w-1/2',
     auraPos: 'left: 16%; top: 8%;',
     priority: false,
   },
@@ -38,7 +38,7 @@ const stageMentors = [
     width: 927,
     height: 927,
     posClass: 'right-[-3%] bottom-0 z-20 w-[64%]',
-    hitClass: 'right-[3%] bottom-[4%] z-30 h-[50%] w-[45%]',
+    hitClass: 'right-0 bottom-0 z-30 h-1/2 w-1/2',
     auraPos: 'left: 44%; top: 38%;',
     priority: false,
   },
@@ -52,7 +52,7 @@ const stageMentors = [
     width: 491,
     height: 873,
     posClass: 'right-0 top-0 z-10 w-[42%]',
-    hitClass: 'right-[2%] top-[3%] z-30 h-[43%] w-[38%]',
+    hitClass: 'right-0 top-0 z-30 h-1/2 w-1/2',
     auraPos: 'left: 48%; top: 8%;',
     priority: false,
   },
@@ -128,6 +128,7 @@ const stageMentors = [
                 fetchpriority={m.priority ? 'high' : 'auto'}
                 decoding="async"
                 data-hero-figure={m.id}
+                data-aura={m.auraPos}
                 class:list={[
                   'pointer-events-none absolute h-auto origin-bottom object-contain opacity-100 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
                   m.posClass,
@@ -142,6 +143,7 @@ const stageMentors = [
               <div
                 aria-hidden="true"
                 data-hero-hit={m.id}
+                data-aura={m.auraPos}
                 title={`${m.name} (${m.role})`}
                 class={`absolute cursor-pointer ${m.hitClass}`}
               ></div>
@@ -169,42 +171,12 @@ const stageMentors = [
 
 <script is:inline>
   (() => {
-    const buttons = Array.from(document.querySelectorAll('[data-hero-select]'));
     const figures = Array.from(document.querySelectorAll('[data-hero-figure]'));
     const hits = Array.from(document.querySelectorAll('[data-hero-hit]'));
     const aura = document.getElementById('hero-stage-aura');
-    const caption = document.getElementById('hero-mentor-caption');
-    if (!buttons.length || !figures.length) return;
+    if (!figures.length) return;
 
     function spotlight(id) {
-      buttons.forEach((btn) => {
-        const active = btn.getAttribute('data-hero-select') === id;
-        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-        btn.classList.toggle('border-[#e87161]', active);
-        btn.classList.toggle('bg-[#241917]', active);
-        btn.classList.toggle('text-[#f3efe9]', active);
-        btn.classList.toggle('border-[#e8dcce]/12', !active);
-        btn.classList.toggle('bg-[#121110]', !active);
-        btn.classList.toggle('text-[#b5aea4]', !active);
-
-        if (active) {
-          const auraStyle = btn.getAttribute('data-aura');
-          if (aura && auraStyle) aura.setAttribute('style', auraStyle);
-          const role = btn.getAttribute('data-role') || '';
-          const spec = btn.getAttribute('data-specialty') || '';
-          if (caption) {
-            caption.innerHTML = '';
-            const strong = document.createElement('strong');
-            strong.className = 'font-semibold text-[#f3efe9]';
-            strong.textContent = role + ': ';
-            const span = document.createElement('span');
-            span.className = 'text-[#b5aea4]';
-            span.textContent = spec;
-            caption.append(strong, span);
-          }
-        }
-      });
-
       figures.forEach((fig) => {
         const active = fig.getAttribute('data-hero-figure') === id;
         fig.classList.toggle('scale-[1.015]', active);
@@ -217,14 +189,15 @@ const stageMentors = [
         fig.classList.toggle('grayscale', !active);
         fig.classList.toggle('brightness-[0.76]', !active);
         fig.classList.toggle('contrast-[1.08]', !active);
+
+        fig.style.zIndex = active ? '22' : '';
+
+        if (active && aura) {
+          const auraStyle = fig.getAttribute('data-aura');
+          if (auraStyle) aura.setAttribute('style', auraStyle);
+        }
       });
     }
-
-    buttons.forEach((btn) => {
-      const id = btn.getAttribute('data-hero-select');
-      btn.addEventListener('click', () => spotlight(id));
-      btn.addEventListener('mouseenter', () => spotlight(id));
-    });
 
     hits.forEach((hit) => {
       const id = hit.getAttribute('data-hero-hit');
