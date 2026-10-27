@@ -1,0 +1,659 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { db } from '../../../lib/db';
+import { getUserFromSession } from '../../../lib/auth';
+
+const user = await getUserFromSession(Astro.cookies);
+const { courseId, lessonId } = Astro.params;
+
+if (!user) {
+  return Astro.redirect(`/auth/login?redirect=${encodeURIComponent(`/classroom/${courseId}/${lessonId}`)}`);
+}
+
+const course = (await db.prepare('SELECT * FROM products WHERE id = ?').get(courseId)) as any;
+if (!course) {
+  return Astro.redirect('/dashboard');
+}
+
+const allLessons = (await db
+  .prepare('SELECT * FROM lessons WHERE course_id = ? ORDER BY order_index ASC')
+  .all(courseId)) as any[];
+
+const currentLesson = allLessons.find((l) => l.id === lessonId) || allLessons[0];
+if (!currentLesson) {
+  return Astro.redirect('/dashboard');
+}
+
+const progressRows = (await db
+  .prepare(`
+    SELECT lesson_id, completed, quiz_score
+    FROM user_lesson_progress
+    WHERE user_id = ?
+  `)
+  .all(user.id)) as any[];
+
+const progressMap = new Map<string, { completed: boolean; quiz_score: number | null }>();
+progressRows.forEach((r) => {
+  progressMap.set(r.lesson_id, { completed: Boolean(r.completed), quiz_score: r.quiz_score });
+});
+
+const completedInCourse = allLessons.filter((l) => progressMap.get(l.id)?.completed).length;
+const courseProgressPercent = allLessons.length > 0 ? Math.round((completedInCourse / allLessons.length) * 100) : 0;
+const isCurrentCompleted = Boolean(progressMap.get(currentLesson.id)?.completed);
+
+const currentIdx = allLessons.findIndex((l) => l.id === currentLesson.id);
+const prevLesson = currentIdx > 0 ? allLessons[currentIdx - 1] : null;
+const nextLesson = currentIdx >= 0 && currentIdx < allLessons.length - 1 ? allLessons[currentIdx + 1] : null;
+
+const quiz =
+  currentLesson.type === 'quiz'
+    ? ((await db.prepare('SELECT * FROM quizzes WHERE lesson_id = ?').get(currentLesson.id)) as any)
+    : null;
+const quizQuestions = quiz ? (JSON.parse(quiz.questions_json) as any[]) : [];
+
+const modulesMap = new Map<string, any[]>();
+allLessons.forEach((l) => {
+  const list = modulesMap.get(l.module_title) || [];
+  list.push(l);
+  modulesMap.set(l.module_title, list);
+});
+
+const orderSuccess = Astro.url.searchParams.get('order_success') === '1';
+
+const typeBadge: Record<string, string> = {
+  video: 'Video Materi',
+  document: 'E-Book & Lembar Kerja',
+  quiz: 'Evaluasi Kompetensi',
+};
+---
+
+<Layout
+  title={`${currentLesson.title} | Ruang Kelas Akademi Creator`}
+  description={`Pelajari ${currentLesson.title} pada program ${course.title}.`}
+  hideNav={true}
+  hideFooter={true}
+  user={user}
+>
+  <div class="min-h-[100dvh] flex flex-col bg-[#121110]">
+    <header class="sticky top-0 z-40 bg-[#121110]/95 backdrop-blur-md border-b border-[rgba(232,220,206,0.14)]">
+      <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <a
+            href="/dashboard"
+            class="btn-outline-warm min-h-10 px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 shrink-0"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span class="hidden sm:inline">Member Area</span>
+          </a>
+          <div class="min-w-0">
+            <div class="text-xs sm:text-sm font-bold text-[#f3efe9] truncate">{course.title}</div>
+            <div class="text-[11px] text-[#9e968c] truncate">{currentLesson.module_title}</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 shrink-0">
+          <div class="hidden md:flex items-center gap-2.5">
+            <div class="w-28 h-2 rounded-full bg-[#24201d] overflow-hidden">
+              <div
+                id="lms-progress-bar"
+                class="h-full bg-[#b84334] rounded-full transition-all"
+                style={`width: ${Math.max(4, courseProgressPercent)}%`}
+              />
+            </div>
+            <span id="lms-progress-text" class="num-tabular text-xs font-semibold text-[#e8e2da]">
+              {courseProgressPercent}%
+            </span>
+          </div>
+
+          <a
+            href="/dashboard/chat"
+            class="btn-outline-warm min-h-10 px-3 py-1.5 rounded-lg text-xs font-semibold hidden sm:inline-flex items-center"
+          >
+            Tanya Mentor
+          </a>
+
+          <button
+            type="button"
+            id="open-syllabus-btn"
+            class="lg:hidden btn-outline-warm min-h-11 px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5"
+          >
+            <span>Daftar Bab</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    {orderSuccess && (
+      <div class="bg-[#1d2c22] border-b border-[#3d6b4c] px-5 py-3 text-center text-xs sm:text-sm text-[#d1fae5]">
+        Pembayaran terverifikasi. Seluruh modul kelas dan ruang diskusi 1-on-1 bersama Aldio Ogut telah aktif di akun Anda.
+      </div>
+    )}
+
+    <div class="flex-1 max-w-[1440px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12">
+      <div class="lg:col-span-8 xl:col-span-9 px-5 sm:px-8 lg:px-10 py-8 lg:py-10 space-y-8">
+        <div class="pb-6 border-b border-[rgba(232,220,206,0.12)]">
+          <div class="flex flex-wrap items-center gap-2 text-xs text-[#e87161] font-semibold mb-2">
+            <span>{typeBadge[currentLesson.type] || 'Materi'}</span>
+            {currentLesson.duration && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span class="num-tabular text-[#b5aea4]">{currentLesson.duration}</span>
+              </>
+            )}
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-[#f3efe9] leading-snug">
+            {currentLesson.title}
+          </h1>
+        </div>
+
+        {currentLesson.type === 'video' && (
+          <div class="space-y-6">
+            <div class="surface-bezel">
+              <div class="surface-bezel-inner overflow-hidden bg-black">
+                <video
+                  id="lms-video"
+                  controls
+                  playsinline
+                  preload="metadata"
+                  poster={course.cover_image || '/acre/curriculum/fast-track.webp'}
+                  class="w-full aspect-video bg-black"
+                >
+                  <source src={currentLesson.video_url} type="video/mp4" />
+                  Peramban Anda belum mendukung pemutar video HTML5.
+                </video>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[rgba(232,220,206,0.14)] bg-[#181614] px-4 py-3">
+              <span class="text-xs font-semibold text-[#b5aea4]">Kecepatan Putar Video:</span>
+              <div role="group" aria-label="Kecepatan putar video" class="flex flex-wrap items-center gap-1.5">
+                {[0.75, 1, 1.25, 1.5, 2].map((rate) => (
+                  <button
+                    type="button"
+                    data-speed={rate}
+                    aria-pressed={rate === 1 ? 'true' : 'false'}
+                    class:list={[
+                      'speed-btn min-h-9 px-3 rounded-lg text-xs font-bold num-tabular border transition-colors',
+                      rate === 1
+                        ? 'bg-[#b84334] text-white border-[#d66151]'
+                        : 'bg-[#121110] text-[#b5aea4] border-[#736b63] hover:text-[#f3efe9]',
+                    ]}
+                  >
+                    {rate}x
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {currentLesson.content_html && (
+              <div class="rounded-2xl border border-[rgba(232,220,206,0.14)] bg-[#181614] p-6 sm:p-8">
+                <div class="prose-lesson" set:html={currentLesson.content_html} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {currentLesson.type === 'document' && (
+          <div class="space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[rgba(232,220,206,0.14)] bg-[#181614] px-4 py-3">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  id="doc-tab-article"
+                  aria-pressed="true"
+                  class="min-h-10 px-3.5 rounded-lg text-xs font-bold border bg-[#b84334] text-white border-[#d66151]"
+                >
+                  Mode Baca Bab
+                </button>
+                {currentLesson.pdf_preview_text && (
+                  <button
+                    type="button"
+                    id="doc-tab-sheet"
+                    aria-pressed="false"
+                    class="min-h-10 px-3.5 rounded-lg text-xs font-bold border bg-[#121110] text-[#b5aea4] border-[#736b63] hover:text-[#f3efe9]"
+                  >
+                    Lembar Kerja Resmi
+                  </button>
+                )}
+              </div>
+
+              <div class="flex items-center gap-1.5" role="group" aria-label="Ukuran teks bacaan">
+                <button
+                  type="button"
+                  id="font-dec"
+                  aria-label="Perkecil ukuran teks"
+                  class="min-h-10 px-3 rounded-lg border border-[#736b63] bg-[#121110] text-xs font-bold text-[#e8e2da] hover:border-[#f3efe9]"
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  id="font-reset"
+                  class="min-h-10 px-3 rounded-lg border border-[#736b63] bg-[#121110] text-xs font-medium text-[#b5aea4] hover:text-[#f3efe9]"
+                >
+                  100%
+                </button>
+                <button
+                  type="button"
+                  id="font-inc"
+                  aria-label="Perbesar ukuran teks"
+                  class="min-h-10 px-3 rounded-lg border border-[#736b63] bg-[#121110] text-xs font-bold text-[#e8e2da] hover:border-[#f3efe9]"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="doc-article-panel"
+              class="rounded-2xl border border-[rgba(232,220,206,0.16)] bg-[#181614] p-6 sm:p-10 transition-all"
+              style="font-size: 16px;"
+            >
+              <div class="prose-lesson" set:html={currentLesson.content_html || ''} />
+            </div>
+
+            {currentLesson.pdf_preview_text && (
+              <div
+                id="doc-sheet-panel"
+                class="hidden rounded-2xl border border-[#cbbba7] bg-[#e8dcce] text-[#121110] p-6 sm:p-10"
+              >
+                <div class="text-xs font-bold uppercase tracking-wider text-[#6e271f] mb-3">
+                  Dokumen Kerja Resmi Akademi Creator
+                </div>
+                <pre class="whitespace-pre-wrap font-mono text-sm leading-relaxed text-[#121110]">{currentLesson.pdf_preview_text}</pre>
+              </div>
+            )}
+          </div>
+        )}
+
+        {currentLesson.type === 'quiz' && quiz && (
+          <div class="space-y-6">
+            <div class="rounded-2xl border border-[rgba(232,220,206,0.16)] bg-[#181614] p-6">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <h2 class="text-lg font-bold text-[#f3efe9]">{quiz.title}</h2>
+                <span class="num-tabular text-xs font-semibold px-2.5 py-1 rounded bg-[#221f1c] text-[#e87161] border border-[rgba(232,220,206,0.14)]">
+                  Batas Lulus: {quiz.passing_score}/100
+                </span>
+              </div>
+              <p class="text-sm text-[#b5aea4]">
+                Pilih satu jawaban paling tepat pada setiap soal untuk menguji pemahaman dan membuka tanda kelulusan bab ini.
+              </p>
+            </div>
+
+            <div id="quiz-result-banner" role="status" aria-live="polite" class="hidden rounded-2xl p-5 border text-sm"></div>
+
+            <form
+              id="quiz-form"
+              data-quiz-id={quiz.id}
+              data-lesson-id={currentLesson.id}
+              class="space-y-6"
+            >
+              {quizQuestions.map((q, qIdx) => (
+                <fieldset
+                  data-question-box={qIdx}
+                  class="rounded-2xl border border-[rgba(232,220,206,0.16)] bg-[#181614] p-6 space-y-3"
+                >
+                  <legend class="text-base font-bold text-[#f3efe9] leading-snug px-1">
+                    <span class="num-tabular text-[#e87161] mr-1.5">{qIdx + 1}.</span>
+                    {q.question}
+                  </legend>
+
+                  <div class="space-y-2.5 pt-1">
+                    {q.options.map((opt: string, optIdx: number) => (
+                      <label class="flex items-start gap-3 p-3.5 rounded-xl border border-[#736b63] bg-[#121110] hover:border-[#e87161] transition-colors">
+                        <input
+                          type="radio"
+                          name={`q_${qIdx}`}
+                          value={optIdx}
+                          required
+                          class="mt-1 accent-[#b84334] w-4 h-4 shrink-0"
+                        />
+                        <span class="text-sm text-[#e8e2da] leading-relaxed">{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div data-question-feedback={qIdx} class="hidden mt-3 p-3.5 rounded-xl text-xs leading-relaxed border"></div>
+                </fieldset>
+              ))}
+
+              <button
+                type="submit"
+                id="quiz-submit-btn"
+                class="btn-crimson min-h-12 px-7 py-3.5 rounded-xl font-bold text-sm sm:text-base"
+              >
+                Kirim Jawaban & Lihat Skor Evaluasi
+              </button>
+            </form>
+          </div>
+        )}
+
+        <div class="pt-6 border-t border-[rgba(232,220,206,0.14)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            {prevLesson && (
+              <a
+                href={`/classroom/${courseId}/${prevLesson.id}`}
+                class="btn-outline-warm min-h-11 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5"
+              >
+                <span>Bab Sebelumnya</span>
+              </a>
+            )}
+
+            <button
+              type="button"
+              id="toggle-complete-btn"
+              data-lesson-id={currentLesson.id}
+              data-course-id={courseId}
+              data-completed={isCurrentCompleted ? 'true' : 'false'}
+              class:list={[
+                'min-h-11 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border transition-colors inline-flex items-center gap-2',
+                isCurrentCompleted
+                  ? 'bg-[#1d2c22] text-[#a7f3d0] border-[#3d6b4c]'
+                  : 'btn-outline-warm',
+              ]}
+            >
+              <span id="toggle-complete-label">
+                {isCurrentCompleted ? 'Bab Telah Selesai' : 'Tandai Bab Selesai'}
+              </span>
+            </button>
+          </div>
+
+          {nextLesson ? (
+            <a
+              href={`/classroom/${courseId}/${nextLesson.id}`}
+              class="btn-crimson min-h-11 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2"
+            >
+              <span>Lanjut ke Bab Berikutnya</span>
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6l6 6-6 6" />
+              </svg>
+            </a>
+          ) : (
+            <a
+              href="/dashboard/chat"
+              class="btn-crimson min-h-11 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2"
+            >
+              <span>Konsultasikan Hasil ke Mentor</span>
+            </a>
+          )}
+        </div>
+      </div>
+
+      <aside class="hidden lg:block lg:col-span-4 xl:col-span-3 border-l border-[rgba(232,220,206,0.14)] bg-[#161412] p-5">
+        <div class="sticky top-24 space-y-5 max-h-[calc(100dvh-7rem)] overflow-y-auto pr-1">
+          <div class="flex items-center justify-between pb-3 border-b border-[rgba(232,220,206,0.12)]">
+            <h2 class="text-sm font-bold text-[#f3efe9]">Kurikulum Kelas</h2>
+            <span class="num-tabular text-xs text-[#9e968c]">{allLessons.length} Bab</span>
+          </div>
+
+          {Array.from(modulesMap.entries()).map(([moduleName, modLessons]) => (
+            <div class="space-y-2">
+              <div class="text-[11px] font-bold uppercase tracking-wider text-[#9e968c] px-1">
+                {moduleName}
+              </div>
+              <div class="space-y-1.5">
+                {modLessons.map((les) => {
+                  const active = les.id === currentLesson.id;
+                  const done = Boolean(progressMap.get(les.id)?.completed);
+                  return (
+                    <a
+                      href={`/classroom/${courseId}/${les.id}`}
+                      aria-current={active ? 'page' : undefined}
+                      class:list={[
+                        'block p-3 rounded-xl border text-xs transition-colors',
+                        active
+                          ? 'bg-[#261816] border-[#b84334] text-[#f3efe9]'
+                          : 'bg-[#121110] border-[rgba(232,220,206,0.1)] text-[#b5aea4] hover:text-[#f3efe9] hover:border-[#736b63]',
+                      ]}
+                    >
+                      <div class="flex items-start justify-between gap-2">
+                        <span class="font-semibold leading-snug">{les.title}</span>
+                        {done && (
+                          <span
+                            data-lesson-badge={les.id}
+                            class="px-1.5 py-0.5 rounded bg-[#1d2c22] border border-[#3d6b4c] text-[10px] font-bold text-[#a7f3d0] shrink-0"
+                          >
+                            Selesai
+                          </span>
+                        )}
+                      </div>
+                      <div class="mt-1 text-[11px] text-[#9e968c]">
+                        {typeBadge[les.type] || 'Materi'} {les.duration ? `· ${les.duration}` : ''}
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </aside>
+    </div>
+
+    <dialog
+      id="syllabus-dialog"
+      aria-label="Daftar Bab Kelas"
+      class="m-0 ml-auto h-[100dvh] max-h-[100dvh] w-full max-w-sm bg-[#161412] text-[#f3efe9] border-l border-[rgba(232,220,206,0.18)] p-0 shadow-2xl"
+    >
+      <div class="flex flex-col h-full p-5">
+        <div class="flex items-center justify-between pb-4 border-b border-[rgba(232,220,206,0.14)]">
+          <span class="text-sm font-bold">Daftar Bab Kelas</span>
+          <button
+            type="button"
+            id="close-syllabus-btn"
+            class="min-h-11 px-3 rounded-lg border border-[#736b63] text-xs font-semibold text-[#e8e2da]"
+          >
+            Tutup
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-4 space-y-4">
+          {Array.from(modulesMap.entries()).map(([moduleName, modLessons]) => (
+            <div class="space-y-2">
+              <div class="text-[11px] font-bold uppercase tracking-wider text-[#9e968c]">{moduleName}</div>
+              {modLessons.map((les) => {
+                const active = les.id === currentLesson.id;
+                const done = Boolean(progressMap.get(les.id)?.completed);
+                return (
+                  <a
+                    href={`/classroom/${courseId}/${les.id}`}
+                    class:list={[
+                      'block p-3 rounded-xl border text-xs',
+                      active
+                        ? 'bg-[#261816] border-[#b84334] text-[#f3efe9]'
+                        : 'bg-[#121110] border-[rgba(232,220,206,0.12)] text-[#b5aea4]',
+                    ]}
+                  >
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="font-semibold">{les.title}</span>
+                      {done && <span class="text-[10px] font-bold text-[#a7f3d0]">Selesai</span>}
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </dialog>
+  </div>
+</Layout>
+
+<script>
+  (() => {
+    const dialog = document.getElementById('syllabus-dialog') as HTMLDialogElement | null;
+    document.getElementById('open-syllabus-btn')?.addEventListener('click', () => dialog?.showModal());
+    document.getElementById('close-syllabus-btn')?.addEventListener('click', () => dialog?.close());
+    dialog?.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    const video = document.getElementById('lms-video') as HTMLVideoElement | null;
+    const speedBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.speed-btn'));
+    speedBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const rate = Number(btn.dataset.speed || 1);
+        if (video) video.playbackRate = rate;
+        speedBtns.forEach((b) => {
+          const active = b === btn;
+          b.setAttribute('aria-pressed', active ? 'true' : 'false');
+          b.classList.toggle('bg-[#b84334]', active);
+          b.classList.toggle('text-white', active);
+          b.classList.toggle('border-[#d66151]', active);
+          b.classList.toggle('bg-[#121110]', !active);
+          b.classList.toggle('text-[#b5aea4]', !active);
+          b.classList.toggle('border-[#736b63]', !active);
+        });
+      });
+    });
+
+    const articleTab = document.getElementById('doc-tab-article');
+    const sheetTab = document.getElementById('doc-tab-sheet');
+    const articlePanel = document.getElementById('doc-article-panel');
+    const sheetPanel = document.getElementById('doc-sheet-panel');
+
+    function setDocMode(showSheet: boolean) {
+      articlePanel?.classList.toggle('hidden', showSheet);
+      sheetPanel?.classList.toggle('hidden', !showSheet);
+      if (articleTab && sheetTab) {
+        articleTab.setAttribute('aria-pressed', showSheet ? 'false' : 'true');
+        sheetTab.setAttribute('aria-pressed', showSheet ? 'true' : 'false');
+        articleTab.className = showSheet
+          ? 'min-h-10 px-3.5 rounded-lg text-xs font-bold border bg-[#121110] text-[#b5aea4] border-[#736b63]'
+          : 'min-h-10 px-3.5 rounded-lg text-xs font-bold border bg-[#b84334] text-white border-[#d66151]';
+        sheetTab.className = showSheet
+          ? 'min-h-10 px-3.5 rounded-lg text-xs font-bold border bg-[#b84334] text-white border-[#d66151]'
+          : 'min-h-10 px-3.5 rounded-lg text-xs font-bold border bg-[#121110] text-[#b5aea4] border-[#736b63]';
+      }
+    }
+
+    articleTab?.addEventListener('click', () => setDocMode(false));
+    sheetTab?.addEventListener('click', () => setDocMode(true));
+
+    let fontSize = 16;
+    const updateFont = (next: number) => {
+      fontSize = Math.min(22, Math.max(14, next));
+      if (articlePanel) articlePanel.style.fontSize = `${fontSize}px`;
+      const resetBtn = document.getElementById('font-reset');
+      if (resetBtn) resetBtn.textContent = `${Math.round((fontSize / 16) * 100)}%`;
+    };
+    document.getElementById('font-dec')?.addEventListener('click', () => updateFont(fontSize - 2));
+    document.getElementById('font-inc')?.addEventListener('click', () => updateFont(fontSize + 2));
+    document.getElementById('font-reset')?.addEventListener('click', () => updateFont(16));
+
+    function updateTopProgress(percent: number) {
+      const bar = document.getElementById('lms-progress-bar');
+      const txt = document.getElementById('lms-progress-text');
+      if (bar) bar.style.width = `${Math.max(4, percent)}%`;
+      if (txt) txt.textContent = `${percent}%`;
+    }
+
+    const completeBtn = document.getElementById('toggle-complete-btn') as HTMLButtonElement | null;
+    const completeLabel = document.getElementById('toggle-complete-label');
+
+    completeBtn?.addEventListener('click', async () => {
+      const currentlyDone = completeBtn.dataset.completed === 'true';
+      const nextDone = !currentlyDone;
+      completeBtn.disabled = true;
+
+      try {
+        const res = await fetch('/api/classroom/progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lessonId: completeBtn.dataset.lessonId,
+            courseId: completeBtn.dataset.courseId,
+            completed: nextDone,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          completeBtn.dataset.completed = nextDone ? 'true' : 'false';
+          if (completeLabel) {
+            completeLabel.textContent = nextDone ? 'Bab Telah Selesai' : 'Tandai Bab Selesai';
+          }
+          completeBtn.className = nextDone
+            ? 'min-h-11 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border transition-colors inline-flex items-center gap-2 bg-[#1d2c22] text-[#a7f3d0] border-[#3d6b4c]'
+            : 'min-h-11 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border transition-colors inline-flex items-center gap-2 btn-outline-warm';
+          if (typeof data.progressPercent === 'number') {
+            updateTopProgress(data.progressPercent);
+          }
+        }
+      } finally {
+        completeBtn.disabled = false;
+      }
+    });
+
+    const quizForm = document.getElementById('quiz-form') as HTMLFormElement | null;
+    const quizBanner = document.getElementById('quiz-result-banner');
+    const quizSubmit = document.getElementById('quiz-submit-btn') as HTMLButtonElement | null;
+
+    quizForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(quizForm);
+      const boxes = document.querySelectorAll('[data-question-box]');
+      const answers: number[] = [];
+
+      for (let i = 0; i < boxes.length; i++) {
+        const val = formData.get(`q_${i}`);
+        if (val === null) {
+          if (quizBanner) {
+            quizBanner.className = 'rounded-2xl p-5 border text-sm bg-[#301513] border-[#e87161] text-[#f3efe9]';
+            quizBanner.textContent = `Mohon pilih jawaban untuk soal nomor ${i + 1} terlebih dahulu.`;
+          }
+          return;
+        }
+        answers.push(Number(val));
+      }
+
+      if (quizSubmit) {
+        quizSubmit.disabled = true;
+        quizSubmit.textContent = 'Menilai Jawaban...';
+      }
+
+      try {
+        const res = await fetch('/api/classroom/quiz', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            quizId: quizForm.dataset.quizId,
+            lessonId: quizForm.dataset.lessonId,
+            answers,
+          }),
+        });
+        const data = await res.json();
+
+        if (data.success && quizBanner) {
+          quizBanner.className = data.passed
+            ? 'rounded-2xl p-5 border text-sm bg-[#1d2c22] border-[#3d6b4c] text-[#d1fae5]'
+            : 'rounded-2xl p-5 border text-sm bg-[#301513] border-[#e87161] text-[#f3efe9]';
+          quizBanner.textContent = data.message;
+          quizBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+          (data.reviewDetails || []).forEach((rev: any) => {
+            const fb = document.querySelector(`[data-question-feedback="${rev.questionIndex}"]`);
+            if (!fb) return;
+            fb.className = rev.isCorrect
+              ? 'mt-3 p-3.5 rounded-xl text-xs leading-relaxed border bg-[#1d2c22] border-[#3d6b4c] text-[#d1fae5]'
+              : 'mt-3 p-3.5 rounded-xl text-xs leading-relaxed border bg-[#301513] border-[#e87161] text-[#f3efe9]';
+            fb.textContent = `${rev.isCorrect ? 'Tepat:' : 'Perlu Ditinjau:'} ${rev.explanation}`;
+          });
+
+          if (data.passed && completeBtn && completeLabel) {
+            completeBtn.dataset.completed = 'true';
+            completeLabel.textContent = 'Bab Telah Selesai';
+            completeBtn.className =
+              'min-h-11 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border transition-colors inline-flex items-center gap-2 bg-[#1d2c22] text-[#a7f3d0] border-[#3d6b4c]';
+          }
+        }
+      } finally {
+        if (quizSubmit) {
+          quizSubmit.disabled = false;
+          quizSubmit.textContent = 'Kirim Ulang Evaluasi';
+        }
+      }
+    });
+  })();
+</script>

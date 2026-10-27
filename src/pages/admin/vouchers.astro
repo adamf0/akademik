@@ -1,0 +1,260 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { db } from '../../lib/db';
+import { getUserFromSession } from '../../lib/auth';
+
+const user = await getUserFromSession(Astro.cookies);
+const isAuthorized = Boolean(user && user.role === 'admin');
+
+const vouchers = isAuthorized
+  ? ((await db.prepare('SELECT * FROM vouchers ORDER BY created_at DESC').all()) as any[])
+  : [];
+
+const formatIDR = (val: number) =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+
+const formatDate = (iso: string) =>
+  new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(iso));
+---
+
+<Layout
+  title="Manajemen Kupon Promo | Konsol Admin Akademi Creator"
+  description="Buat dan pantau kuota pemakaian kode kupon potongan harga Akademi Creator."
+  user={user}
+>
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-10 lg:py-14">
+    {!isAuthorized ? (
+      <div class="max-w-xl mx-auto rounded-2xl border border-[rgba(232,220,206,0.18)] bg-[#181614] p-8 space-y-5 text-center">
+        <h1 class="font-display text-3xl font-bold uppercase text-[#f3efe9]">
+          Akses Khusus Administrator Operasional
+        </h1>
+        <p class="text-sm text-[#b5aea4]">Aktifkan sesi Administrator untuk membuat atau memantau kupon diskon.</p>
+        <a
+          href="/api/auth/demo?role=admin&redirect=/admin/vouchers"
+          class="btn-crimson min-h-11 px-6 py-3 rounded-xl text-sm font-bold inline-flex items-center"
+        >
+          Aktifkan Sesi Admin Operasional
+        </a>
+      </div>
+    ) : (
+      <div class="space-y-10">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 pb-6 border-b border-[rgba(232,220,206,0.14)]">
+          <div>
+            <h1 class="font-display text-3xl sm:text-5xl font-bold uppercase leading-[0.98] text-[#f3efe9]">
+              Mesin Kupon & Potongan Harga
+            </h1>
+            <p class="text-sm text-[#b5aea4] mt-1">
+              Atur kode promo nominal tetap maupun persentase beserta batas transaksi minimum dan kuota klaim.
+            </p>
+          </div>
+
+          <nav aria-label="Menu Konsol Admin" class="flex flex-wrap items-center gap-2">
+            <a href="/admin" class="btn-outline-warm min-h-11 px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center">
+              Ringkasan
+            </a>
+            <a href="/admin/products" class="btn-outline-warm min-h-11 px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center">
+              Katalog Produk
+            </a>
+            <a
+              href="/admin/vouchers"
+              aria-current="page"
+              class="min-h-11 px-4 py-2 rounded-lg text-xs font-bold bg-[#b84334] text-white border border-[#d66151] inline-flex items-center"
+            >
+              Kupon Promo
+            </a>
+            <a href="/admin/chat" class="btn-outline-warm min-h-11 px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center">
+              Meja Diskusi Mentor
+            </a>
+          </nav>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div class="lg:col-span-5 surface-bezel">
+            <div class="surface-bezel-inner p-6 sm:p-7">
+              <h2 class="text-lg font-bold text-[#f3efe9] mb-5">Buat Kode Kupon Baru</h2>
+
+              <form id="admin-voucher-form" class="space-y-4" novalidate>
+                <div>
+                  <label for="v-code" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                    Kode Kupon (Huruf Kapital & Angka)
+                  </label>
+                  <input
+                    type="text"
+                    id="v-code"
+                    required
+                    placeholder="BATCH90K"
+                    class="input-warm w-full min-h-11 px-3.5 py-2.5 text-sm font-mono uppercase"
+                  />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label for="v-type" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                      Jenis Potongan
+                    </label>
+                    <select id="v-type" class="input-warm w-full min-h-11 px-3 py-2.5 text-sm">
+                      <option value="fixed">Nominal Rupiah (IDR)</option>
+                      <option value="percentage">Persentase (%)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label for="v-value" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                      Nilai Potongan
+                    </label>
+                    <input
+                      type="number"
+                      id="v-value"
+                      required
+                      min="1"
+                      placeholder="90000"
+                      class="input-warm num-tabular w-full min-h-11 px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label for="v-min" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                      Minimum Belanja (IDR)
+                    </label>
+                    <input
+                      type="number"
+                      id="v-min"
+                      min="0"
+                      value="0"
+                      class="input-warm num-tabular w-full min-h-11 px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label for="v-max" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                      Batas Kuota Klaim
+                    </label>
+                    <input
+                      type="number"
+                      id="v-max"
+                      min="1"
+                      value="100"
+                      class="input-warm num-tabular w-full min-h-11 px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div id="v-feedback" role="status" aria-live="polite" class="hidden p-3 rounded-xl text-xs border"></div>
+
+                <button
+                  type="submit"
+                  id="v-submit"
+                  class="btn-crimson min-h-12 w-full px-5 py-3 rounded-xl text-sm font-bold"
+                >
+                  Terbitkan Kode Kupon
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 space-y-4">
+            <h2 class="text-lg font-bold text-[#f3efe9]">Daftar Kupon Terdaftar ({vouchers.length})</h2>
+
+            <div class="overflow-x-auto rounded-2xl border border-[rgba(232,220,206,0.14)] bg-[#161412]">
+              <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr class="border-b border-[rgba(232,220,206,0.14)] text-xs uppercase tracking-wider text-[#9e968c]">
+                    <th class="py-3.5 px-5 font-semibold">Kode</th>
+                    <th class="py-3.5 px-5 font-semibold">Potongan</th>
+                    <th class="py-3.5 px-5 font-semibold">Min. Belanja</th>
+                    <th class="py-3.5 px-5 font-semibold text-right">Terpakai / Kuota</th>
+                    <th class="py-3.5 px-5 font-semibold text-right">Berlaku Hingga</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[rgba(232,220,206,0.1)]">
+                  {vouchers.map((v) => (
+                    <tr>
+                      <td class="py-4 px-5 font-mono text-xs font-bold text-[#f3efe9]">{v.code}</td>
+                      <td class="py-4 px-5 num-tabular font-semibold text-[#e87161]">
+                        {v.type === 'percentage' ? `${v.value}%` : formatIDR(v.value)}
+                      </td>
+                      <td class="py-4 px-5 num-tabular text-xs text-[#b5aea4]">
+                        {v.min_spend > 0 ? formatIDR(v.min_spend) : 'Tanpa minimum'}
+                      </td>
+                      <td class="py-4 px-5 num-tabular text-xs text-[#f3efe9] text-right">
+                        {v.used_count} / {v.max_uses}
+                      </td>
+                      <td class="py-4 px-5 num-tabular text-xs text-[#9e968c] text-right">
+                        {formatDate(v.expires_at)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </section>
+</Layout>
+
+<script>
+  const form = document.getElementById('admin-voucher-form') as HTMLFormElement | null;
+  const feedback = document.getElementById('v-feedback');
+  const submitBtn = document.getElementById('v-submit') as HTMLButtonElement | null;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    feedback?.classList.add('hidden');
+
+    const code = (document.getElementById('v-code') as HTMLInputElement)?.value?.trim().toUpperCase();
+    const type = (document.getElementById('v-type') as HTMLSelectElement)?.value;
+    const value = Number((document.getElementById('v-value') as HTMLInputElement)?.value);
+    const min_spend = Number((document.getElementById('v-min') as HTMLInputElement)?.value || 0);
+    const max_uses = Number((document.getElementById('v-max') as HTMLInputElement)?.value || 100);
+
+    if (!code || Number.isNaN(value) || value <= 0) {
+      if (feedback) {
+        feedback.className = 'p-3 rounded-xl text-xs border bg-[#301513] border-[#e87161] text-[#f3efe9]';
+        feedback.textContent = 'Mohon masukkan kode kupon dan besaran potongan yang valid.';
+      }
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Menerbitkan Kupon...';
+    }
+
+    try {
+      const res = await fetch('/api/admin/vouchers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, type, value, min_spend, max_uses }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        if (feedback) {
+          feedback.className = 'p-3 rounded-xl text-xs border bg-[#1d2c22] border-[#3d6b4c] text-[#d1fae5]';
+          feedback.textContent = data.message || 'Kupon diterbitkan. Memuat ulang...';
+        }
+        setTimeout(() => window.location.reload(), 650);
+        return;
+      }
+
+      if (feedback) {
+        feedback.className = 'p-3 rounded-xl text-xs border bg-[#301513] border-[#e87161] text-[#f3efe9]';
+        feedback.textContent = data.message || 'Gagal membuat kupon.';
+      }
+    } catch {
+      if (feedback) {
+        feedback.className = 'p-3 rounded-xl text-xs border bg-[#301513] border-[#e87161] text-[#f3efe9]';
+        feedback.textContent = 'Terjadi gangguan jaringan saat menerbitkan kupon.';
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Terbitkan Kode Kupon';
+      }
+    }
+  });
+</script>

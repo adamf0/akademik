@@ -1,0 +1,265 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { db } from '../../lib/db';
+import { getUserFromSession } from '../../lib/auth';
+
+const user = await getUserFromSession(Astro.cookies);
+const isAuthorized = Boolean(user && (user.role === 'mentor' || user.role === 'admin'));
+
+const rooms = isAuthorized
+  ? ((await db
+      .prepare(`
+        SELECT cr.*, u.name as student_name, u.email as student_email, p.title as course_title,
+          (SELECT message FROM chat_messages WHERE room_id = cr.id ORDER BY created_at DESC LIMIT 1) as last_message
+        FROM chat_rooms cr
+        JOIN users u ON cr.student_id = u.id
+        JOIN products p ON cr.course_id = p.id
+        ORDER BY cr.updated_at DESC
+      `)
+      .all()) as any[])
+  : [];
+
+const selectedRoomId = Astro.url.searchParams.get('room') || rooms[0]?.id || '';
+const activeRoom = rooms.find((r) => r.id === selectedRoomId) || rooms[0] || null;
+
+const messages = activeRoom
+  ? ((await db
+      .prepare(`
+        SELECT cm.*, u.name as sender_name, u.role as sender_role
+        FROM chat_messages cm
+        JOIN users u ON cm.sender_id = u.id
+        WHERE cm.room_id = ?
+        ORDER BY cm.created_at ASC
+      `)
+      .all(activeRoom.id)) as any[])
+  : [];
+
+const formatTime = (iso: string) =>
+  new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }).format(
+    new Date(iso)
+  );
+---
+
+<Layout
+  title="Meja Diskusi Mentor 1-on-1 | Akademi Creator"
+  description="Panel mentor dan administrator untuk membalas konsultasi naskah dan evaluasi akun siswa."
+  user={user}
+>
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-10 lg:py-14">
+    {!isAuthorized ? (
+      <div class="max-w-xl mx-auto rounded-2xl border border-[rgba(232,220,206,0.18)] bg-[#181614] p-8 space-y-5 text-center">
+        <h1 class="font-display text-3xl font-bold uppercase text-[#f3efe9]">
+          Meja Konsultasi Khusus Mentor & Admin
+        </h1>
+        <p class="text-sm text-[#b5aea4]">
+          Gunakan sesi Head Mentor atau Administrator di bawah ini untuk membaca dan membalas pesan konsultasi siswa.
+        </p>
+        <div class="flex flex-wrap justify-center gap-3">
+          <a
+            href="/api/auth/demo?role=mentor&redirect=/admin/chat"
+            class="btn-crimson min-h-11 px-6 py-3 rounded-xl text-sm font-bold inline-flex items-center"
+          >
+            Masuk sebagai Head Mentor (Aldio Ogut)
+          </a>
+          <a
+            href="/api/auth/demo?role=admin&redirect=/admin/chat"
+            class="btn-outline-warm min-h-11 px-5 py-3 rounded-xl text-sm font-semibold inline-flex items-center"
+          >
+            Masuk sebagai Admin
+          </a>
+        </div>
+      </div>
+    ) : (
+      <div class="space-y-8">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 pb-6 border-b border-[rgba(232,220,206,0.14)]">
+          <div>
+            <h1 class="font-display text-3xl sm:text-5xl font-bold uppercase leading-[0.98] text-[#f3efe9]">
+              Meja Diskusi 1-on-1 Siswa
+            </h1>
+            <p class="text-sm text-[#b5aea4] mt-1">
+              Masuk sebagai <strong class="text-[#f3efe9]">{user?.name}</strong>. Pilih ruang diskusi siswa untuk memberikan umpan balik naskah atau strategi.
+            </p>
+          </div>
+
+          {user?.role === 'admin' && (
+            <nav aria-label="Menu Konsol Admin" class="flex flex-wrap items-center gap-2">
+              <a href="/admin" class="btn-outline-warm min-h-11 px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center">
+                Ringkasan
+              </a>
+              <a href="/admin/products" class="btn-outline-warm min-h-11 px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center">
+                Katalog Produk
+              </a>
+              <a href="/admin/vouchers" class="btn-outline-warm min-h-11 px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center">
+                Kupon Promo
+              </a>
+              <a
+                href="/admin/chat"
+                aria-current="page"
+                class="min-h-11 px-4 py-2 rounded-lg text-xs font-bold bg-[#b84334] text-white border border-[#d66151] inline-flex items-center"
+              >
+                Meja Diskusi Mentor
+              </a>
+            </nav>
+          )}
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <aside class="lg:col-span-4 space-y-2.5">
+            <div class="text-xs font-bold uppercase tracking-wider text-[#9e968c] px-1">
+              Daftar Ruang Siswa ({rooms.length})
+            </div>
+            {rooms.length > 0 ? (
+              rooms.map((rm) => {
+                const active = activeRoom?.id === rm.id;
+                return (
+                  <a
+                    href={`/admin/chat?room=${rm.id}`}
+                    aria-current={active ? 'page' : undefined}
+                    class:list={[
+                      'block p-4 rounded-xl border transition-colors',
+                      active
+                        ? 'bg-[#261816] border-[#b84334] text-[#f3efe9]'
+                        : 'bg-[#181614] border-[rgba(232,220,206,0.14)] text-[#b5aea4] hover:text-[#f3efe9]',
+                    ]}
+                  >
+                    <div class="text-sm font-bold text-[#f3efe9]">{rm.student_name}</div>
+                    <div class="text-xs text-[#e87161] truncate mt-0.5">{rm.course_title}</div>
+                    {rm.last_message && (
+                      <p class="text-xs text-[#9e968c] line-clamp-2 mt-2">{rm.last_message}</p>
+                    )}
+                  </a>
+                );
+              })
+            ) : (
+              <div class="rounded-xl border border-[rgba(232,220,206,0.14)] bg-[#181614] p-5 text-xs text-[#b5aea4]">
+                Belum ada antrean diskusi siswa saat ini.
+              </div>
+            )}
+          </aside>
+
+          <div class="lg:col-span-8 surface-bezel">
+            <div class="surface-bezel-inner flex flex-col h-[620px] max-h-[78dvh]">
+              {activeRoom ? (
+                <>
+                  <div class="px-5 py-4 border-b border-[rgba(232,220,206,0.12)]">
+                    <div class="text-sm font-bold text-[#f3efe9]">{activeRoom.title}</div>
+                    <div class="text-xs text-[#9e968c]">{activeRoom.student_email}</div>
+                  </div>
+
+                  <div id="mentor-chat-list" class="flex-1 overflow-y-auto p-5 space-y-4">
+                    {messages.map((msg) => {
+                      const isMentorSide = msg.sender_role === 'mentor' || msg.sender_role === 'admin';
+                      return (
+                        <div class:list={['flex flex-col max-w-[85%]', isMentorSide ? 'ml-auto items-end' : 'mr-auto items-start']}>
+                          <div class="text-[11px] text-[#9e968c] mb-1 px-1">
+                            <span class="font-semibold text-[#b5aea4]">{msg.sender_name}</span>
+                            <span aria-hidden="true"> · </span>
+                            <span class="num-tabular">{formatTime(msg.created_at)}</span>
+                          </div>
+                          <div
+                            class:list={[
+                              'rounded-2xl px-4 py-3 text-sm leading-relaxed border',
+                              isMentorSide
+                                ? 'bg-[#2a1917] text-[#f3efe9] border-[#b84334]'
+                                : 'bg-[#1e1b18] text-[#e8e2da] border-[rgba(232,220,206,0.16)]',
+                            ]}
+                          >
+                            <p class="whitespace-pre-line">{msg.message}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <form
+                    id="mentor-reply-form"
+                    data-room-id={activeRoom.id}
+                    data-sender-name={user?.name || 'Mentor'}
+                    class="p-4 border-t border-[rgba(232,220,206,0.12)] bg-[#121110] flex flex-col sm:flex-row gap-2.5"
+                  >
+                    <label for="mentor-reply-input" class="sr-only">Balasan evaluasi untuk siswa</label>
+                    <textarea
+                      id="mentor-reply-input"
+                      rows="2"
+                      required
+                      placeholder="Tulis arahan perbaikan naskah atau evaluasi akun untuk siswa ini..."
+                      class="input-warm flex-1 px-3.5 py-2.5 text-sm resize-none"
+                    ></textarea>
+                    <button
+                      type="submit"
+                      id="mentor-reply-btn"
+                      class="btn-crimson min-h-12 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shrink-0"
+                    >
+                      Kirim Arahan
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div class="p-10 text-center text-sm text-[#b5aea4]">
+                  Pilih salah satu ruang siswa di sisi kiri untuk memulai diskusi.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </section>
+</Layout>
+
+<script>
+  (() => {
+    const list = document.getElementById('mentor-chat-list');
+    const form = document.getElementById('mentor-reply-form') as HTMLFormElement | null;
+    const input = document.getElementById('mentor-reply-input') as HTMLTextAreaElement | null;
+    const btn = document.getElementById('mentor-reply-btn') as HTMLButtonElement | null;
+
+    if (list) list.scrollTop = list.scrollHeight;
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const roomId = form.dataset.roomId || '';
+      const senderName = form.dataset.senderName || 'Mentor';
+      const message = input?.value?.trim() || '';
+      if (!roomId || !message) return;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Mengirim...';
+      }
+
+      try {
+        const res = await fetch('/api/chat/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roomId, message }),
+        });
+        const data = await res.json();
+        if (data.success && list) {
+          const wrap = document.createElement('div');
+          wrap.className = 'flex flex-col max-w-[85%] ml-auto items-end';
+
+          const meta = document.createElement('div');
+          meta.className = 'text-[11px] text-[#9e968c] mb-1 px-1';
+          meta.textContent = `${senderName} · Baru saja`;
+
+          const bubble = document.createElement('div');
+          bubble.className =
+            'rounded-2xl px-4 py-3 text-sm leading-relaxed border bg-[#2a1917] text-[#f3efe9] border-[#b84334]';
+          bubble.textContent = message;
+
+          wrap.appendChild(meta);
+          wrap.appendChild(bubble);
+          list.appendChild(wrap);
+          list.scrollTop = list.scrollHeight;
+          if (input) input.value = '';
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Kirim Arahan';
+        }
+      }
+    });
+  })();
+</script>

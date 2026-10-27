@@ -1,0 +1,1107 @@
+---
+import PriceCounter from './PriceCounter.astro';
+
+const alumniCases = [
+  {
+    id: 'fadli',
+    name: 'Fadli Digital',
+    handle: '@fadlidigital',
+    headline: 'Rp 115.450.668 Pendapatan Produk Digital dari Konten Edukasi',
+    summary:
+      'Berawal dari mengurai masalah praktis audiens menjadi konten pendek harian, lalu mengonversi kepercayaan penonton menjadi penjualan kelas dan produk digital mandiri.',
+    metricLabel: 'Total Omzet Terdokumentasi',
+    metricValue: 'Rp 115.450.668',
+    targetPrice: 115450668,
+    image: '/acre/alumni/1-fadli-digital.png',
+  },
+  {
+    id: 'dimas',
+    name: 'Dimas Gepeto',
+    handle: '@dimasgepeto',
+    headline: '384K Pengikut Organik & Nilai Kerja Sama Brand Rp 9 Juta',
+    summary:
+      'Menerapkan kerangka retensi 3 detik pertama dan konsistensi karakter cerita hingga menembus ratusan ribu pengikut aktif serta kontrak kerja sama brand bernilai tinggi.',
+    metricLabel: 'Pertumbuhan & Nilai Endorse',
+    metricValue: '384K Pengikut / Rp 9 Juta',
+    image: '/acre/alumni/2-dimas-gepeto.png',
+  },
+  {
+    id: 'anwar',
+    name: 'Anwar Choladi',
+    handle: '@anwarcholadi',
+    headline: 'Membangun Otoritas Ceruk Spesifik dari Nol hingga Komunitas Loyal',
+    summary:
+      'Membedah ulang positioning akun menggunakan matriks Audience-Centric sehingga setiap unggahan menarik profil penonton yang tepat sasaran.',
+    metricLabel: 'Fokus Transformasi',
+    metricValue: 'Positioning & Distribusi Organik',
+    image: '/acre/alumni/3-anwar-choladi.png',
+  },
+  {
+    id: 'sholeh',
+    name: 'Sholeh Terarabarab',
+    handle: '@sholeh_terarabarab',
+    headline: 'Lonjakan Jangkauan Jutaan Tayangan dengan Struktur Storytelling',
+    summary:
+      'Keluar dari jebakan 200 tayangan setelah memperbaiki ritme penceritaan 45 detik dan mengunci rasa penasaran penonton sejak kalimat pembuka.',
+    metricLabel: 'Fokus Transformasi',
+    metricValue: 'Retensi Video & Jangkauan',
+    image: '/acre/alumni/4-sholeh-terarabarab.png',
+  },
+  {
+    id: 'putri',
+    name: 'Putri Mulia',
+    handle: '@putrimulia',
+    headline: 'Personal Branding Profesional yang Mengundang Klien Secara Inbound',
+    summary:
+      'Menjadikan konten pendek sebagai etalase keahlian nyata sehingga calon klien dan mitra bisnis datang tanpa perlu penawaran dingin.',
+    metricLabel: 'Fokus Transformasi',
+    metricValue: 'Otoritas Personal Brand',
+    image: '/acre/alumni/5-putri-mulia.png',
+  },
+  {
+    id: 'gio',
+    name: 'Gio Maulana',
+    handle: '@giomaulana',
+    headline: 'Eksekusi Disiplin Fast Track dari Akun Baru Menjadi Kreator Produktif',
+    summary:
+      'Memangkas waktu riset dan penulisan naskah menggunakan sistem kerja kurikulum Akademi Creator sehingga produksi konten berjalan konsisten setiap minggu.',
+    metricLabel: 'Fokus Transformasi',
+    metricValue: 'Sistem Produksi Konsisten',
+    image: '/acre/alumni/6-gio-maulana.png',
+  },
+];
+
+const socialNiches = [
+  { id: 'all', label: 'Semua Ceruk (13)' },
+  { id: 'bisnis', label: 'Bisnis, Sales & Data (4)' },
+  { id: 'edukasi', label: 'Edukasi & Bahasa (3)' },
+  { id: 'parenting', label: 'Parenting & Kesehatan (3)' },
+  { id: 'kriya', label: 'Kriya, Pangan & Video (3)' },
+];
+
+const socialProfiles = [
+  {
+    id: 'dimas-gepeto',
+    name: 'Dimas Gepeto',
+    handle: '@dimasgepeto',
+    platform: 'Instagram',
+    role: 'Woodworking & DIY',
+    niche: 'kriya',
+    followers: '762K Pengikut',
+    reach: '5,4 Jt Tayangan / 30 Hari',
+    image: '/acre/social/dimas-gepeto.webp',
+  },
+  {
+    id: 'anisa-andini',
+    name: 'Anisa Andini',
+    handle: '@lulusanfatherless',
+    platform: 'Instagram',
+    role: 'Ibu Rumah Tangga & Parenting',
+    niche: 'parenting',
+    followers: '250K Pengikut',
+    reach: '1,7 Jt Tayangan / 30 Hari',
+    image: '/acre/social/anisa-andini.webp',
+  },
+  {
+    id: 'hendra-setyo',
+    name: 'Hendra Setyo',
+    handle: '@HendraSetyoChannel',
+    platform: 'YouTube',
+    role: 'Affiliator & Bisnis Digital',
+    niche: 'bisnis',
+    followers: '865K Subscriber',
+    reach: 'Kanal YouTube Terverifikasi',
+    image: '/acre/social/hendra-setyo.webp',
+  },
+  {
+    id: 'speaklikeluke',
+    name: 'Speak Like Luke',
+    handle: '@speaklikeluke',
+    platform: 'Instagram',
+    role: 'Tutor Bahasa Inggris',
+    niche: 'edukasi',
+    followers: '172K Pengikut',
+    reach: '12,2 Jt Tayangan / 30 Hari',
+    image: '/acre/social/speaklikeluke.webp',
+  },
+  {
+    id: 'erwin-setiawan',
+    name: 'Erwin Setiawan',
+    handle: '@anakpanganindonesia',
+    platform: 'Instagram',
+    role: 'Teknologi Pangan',
+    niche: 'kriya',
+    followers: '342K Pengikut',
+    reach: '1,8 Jt Tayangan / 30 Hari',
+    image: '/acre/social/erwin-setiawan.webp',
+  },
+  {
+    id: 'nelson-gani',
+    name: 'Nelson Gani',
+    handle: '@nelsongani_',
+    platform: 'Instagram',
+    role: 'Sales Strategist',
+    niche: 'bisnis',
+    followers: '275K Pengikut',
+    reach: '3,7 Jt Tayangan / 30 Hari',
+    image: '/acre/social/nelson-gani.webp',
+  },
+  {
+    id: 'anisa-apriani',
+    name: 'Anisa Apriani',
+    handle: '@amica_369',
+    platform: 'Instagram',
+    role: 'Hipnoterapis & Kesehatan Mental',
+    niche: 'parenting',
+    followers: '134K Pengikut',
+    reach: '1,0 Jt Tayangan / 30 Hari',
+    image: '/acre/social/anisa-apriani.webp',
+  },
+  {
+    id: 'anwar-choladi',
+    name: 'Anwar Choladi',
+    handle: '@anwar.choladi',
+    platform: 'Instagram',
+    role: 'Guru Tahsin & Tahfidz',
+    niche: 'edukasi',
+    followers: '151K Pengikut',
+    reach: '1,8 Jt Tayangan / 30 Hari',
+    image: '/acre/social/anwar-choladi.webp',
+  },
+  {
+    id: 'andi-setianto',
+    name: 'Andi Setianto',
+    handle: '@datasukaria',
+    platform: 'Instagram',
+    role: 'Data Analyst & Excel Educator',
+    niche: 'bisnis',
+    followers: '104K Pengikut',
+    reach: '972K Tayangan / 30 Hari',
+    image: '/acre/social/andi-setianto.webp',
+  },
+  {
+    id: 'andrew-yudha',
+    name: 'Andrew Yudha',
+    handle: '@andrew_yudha',
+    platform: 'Instagram',
+    role: 'Guru Bahasa Inggris',
+    niche: 'edukasi',
+    followers: '129K Pengikut',
+    reach: '704 Unggahan Edukasi',
+    image: '/acre/social/andrew-yudha.webp',
+  },
+  {
+    id: 'putri-mulia',
+    name: 'Putri Mulia',
+    handle: '@pu7rimulia',
+    platform: 'Instagram',
+    role: 'Ibu Rumah Tangga & Produk Digital',
+    niche: 'parenting',
+    followers: '81,3K Pengikut',
+    reach: '300 Unggahan Konsisten',
+    image: '/acre/social/putri-mulia.webp',
+  },
+  {
+    id: 'fadli-digital',
+    name: 'Fadli Digital',
+    handle: '@fadlidigital',
+    platform: 'Instagram',
+    role: 'Digital Marketer & Automation',
+    niche: 'bisnis',
+    followers: '45,3K Pengikut',
+    reach: '36,8K Tayangan / 30 Hari',
+    image: '/acre/social/fadli-digital.webp',
+  },
+  {
+    id: 'ilhamvx',
+    name: 'Ilham VX',
+    handle: '@ilhamvx',
+    platform: 'Instagram',
+    role: 'Mobile Video Creator',
+    niche: 'kriya',
+    followers: '190K Pengikut',
+    reach: '107,6K Tayangan / 30 Hari',
+    image: '/acre/social/ilhamvx.webp',
+  },
+];
+
+const testimonyFilters = [
+  { id: 'featured', label: '6 Ulasan Pilihan' },
+  { id: 'all', label: 'Semua Ulasan (12)' },
+  { id: 'kurikulum', label: 'Kurikulum & Iklan (4)' },
+  { id: 'komunitas', label: 'Komunitas & AI (4)' },
+  { id: 'mentoring', label: 'Mentoring & Live (4)' },
+];
+
+const testimonyCards = [
+  {
+    id: 'rizal',
+    name: 'Rizal Ahmad Riyanto',
+    context: 'Anggota Aktif · Kurikulum Detail & Terstruktur',
+    category: 'kurikulum',
+    featured: true,
+    quote: 'Mantep banget ilmunya, detail dan terstruktur, highly recommend banget lah pokoknya.',
+    avatar: '/acre/testimonies/avatars/rizal-ahmad-riyanto.webp',
+  },
+  {
+    id: 'niluh',
+    name: 'Ni Luh Putu Seriawati',
+    context: 'Digital Advertiser · Riset Winning Content & CPA',
+    category: 'kurikulum',
+    featured: true,
+    quote:
+      'Gua sebagai Advertiser sangat terbantu untuk tau konten mana yang winning untuk kampanye iklan. Dan bisa nurunin CPA / Biaya Per Hasil signifikan.',
+    avatar: '/acre/testimonies/avatars/ni-luh-putu-seriawati.webp',
+  },
+  {
+    id: 'rafi',
+    name: 'Rafi Firasyan Ardi',
+    context: 'Penulis Buku · Diskusi & Konsultasi Kendala',
+    category: 'mentoring',
+    featured: true,
+    quote:
+      'Di sini kamu bisa dapetin ilmu yang di sekolahan gak kamu temui, kamu bisa diskusi, dan konsul kendala yang kamu temui untuk dibedah apa yang menjadi problemnya.',
+    avatar: '/acre/testimonies/avatars/rafi-firasyan-ardi.webp',
+  },
+  {
+    id: 'andrean',
+    name: 'Andrean Desta',
+    context: 'Anggota Aktif · Ekosistem Support & Praktik AI',
+    category: 'komunitas',
+    featured: true,
+    quote:
+      'Komunitasnya aktif, saling support, dan sekarang juga udah mulai bahas soal AI + gimana cara pakenya buat ngembangin konten.',
+    avatar: '/acre/testimonies/avatars/andrean-desta.webp',
+  },
+  {
+    id: 'raynaldi',
+    name: 'Raynaldi A. Rafi',
+    context: 'Anggota Aktif · Sistem Belajar Course Curriculum',
+    category: 'kurikulum',
+    featured: true,
+    quote:
+      'Banyak ilmu daging disini, dan suka sama websitenya materi terstruktur berbasis Course Curriculum, best pokonya.',
+    avatar: '/acre/testimonies/avatars/raynaldi-a-rafi.webp',
+  },
+  {
+    id: 'hendry',
+    name: 'Hendry Heish',
+    context: 'Anggota Aktif · Komunitas Kreator & Adopsi AI',
+    category: 'komunitas',
+    featured: true,
+    quote:
+      'Komunitas ngajarin content creator yg aktif banget. Skg jg sudah mulai aktif memperkenalkan AI dan cara pakainya.',
+    avatar: '/acre/testimonies/avatars/hendry-heish.webp',
+  },
+  {
+    id: 'agus',
+    name: 'Agus Munawar Tamim',
+    context: 'Anggota Aktif · Update Materi & Layanan After-Sales',
+    category: 'mentoring',
+    featured: false,
+    quote:
+      'So insighful! Ilmunya aplikabel juga di lain bidang. Apalagi dapat materi update with no extra charge. What an excellent after sales!',
+    avatar: '/acre/testimonies/avatars/agus-munawar-tamim.webp',
+  },
+  {
+    id: 'fiqri',
+    name: 'Fiqri Atriyani',
+    context: 'Anggota Aktif · Pondasi Konten Lintas Platform',
+    category: 'kurikulum',
+    featured: false,
+    quote:
+      'Jujur isinya bagus bangett buat kalian yang mau jadi content creator di platform apapun. keputusan yang paling aku sesali karna kenapa baru beli tahun iniii harusnya dari lamaaa..',
+    avatar: '/acre/testimonies/avatars/fiqri-atriyani.webp',
+  },
+  {
+    id: 'sapta',
+    name: 'Sapta Eky Abdillah',
+    context: 'Anggota Aktif · Komunitas Responsif & Diskusi Modul',
+    category: 'komunitas',
+    featured: false,
+    quote:
+      'Materi nya works, komunitas nya full support & responsive, after sales servicenya ajib sih.. Selain bahas modul, per sosmedan, juga banyak obrolan ringan & asik.',
+    avatar: '/acre/testimonies/avatars/sapta-eky-abdillah.webp',
+  },
+  {
+    id: 'steve',
+    name: 'Steve Kwan',
+    context: 'Anggota Aktif · Kolaborasi Sesama Kreator',
+    category: 'komunitas',
+    featured: false,
+    quote:
+      'Gak ribet buat belajar, gampang banget buat dimengerti, bisa langsung tanya klo gak paham, belajar bareng sama content creator lain. Acre rasa keluarga!',
+    avatar: '/acre/testimonies/avatars/steve-kwan.webp',
+  },
+  {
+    id: 'junar',
+    name: 'Junar Asunyi',
+    context: 'Anggota Aktif · Sesi Live Rutin & Praktik Materi',
+    category: 'mentoring',
+    featured: false,
+    quote:
+      'Materinya mudah dipahami dan bisa dipraktekkin dengan mudah, gak cuma belajar tapi juga ada sesi live rutin bareng member lain.',
+    avatar: '/acre/testimonies/avatars/junar-asunyi.webp',
+  },
+  {
+    id: 'tria',
+    name: 'Tria Ananda',
+    context: 'Anggota Aktif · Pendampingan Pasca-Kelas',
+    category: 'mentoring',
+    featured: false,
+    quote: 'Why? karena pembimbingnya gak lepas tangan setelah ngasih course, mantap!',
+    avatar: '/acre/testimonies/avatars/tria-ananda.webp',
+  },
+];
+
+function getInitialFanStyle(idx: number, total: number) {
+  let d = idx;
+  if (d > total / 2) d -= total;
+  const abs = Math.abs(d);
+  if (abs > 3) {
+    return 'transform: translate3d(0px, 120px, 0) scale(0.6); opacity: 0; pointer-events: none; z-index: 1;';
+  }
+  if (d === 0) {
+    return 'transform: translate3d(0px, -8px, 0) rotate(0deg) scale(1.06); opacity: 1; filter: drop-shadow(0 28px 52px rgba(0,0,0,0.68)); z-index: 50;';
+  }
+  const x = d * 136;
+  const y = abs === 1 ? 24 : abs === 2 ? 58 : 98;
+  const rot = d * 10.5;
+  const sc = abs === 1 ? 0.89 : abs === 2 ? 0.79 : 0.69;
+  const br = abs === 1 ? 0.76 : abs === 2 ? 0.52 : 0.34;
+  const z = 40 - abs * 10;
+  return `transform: translate3d(${x}px, ${y}px, 0) rotate(${rot}deg) scale(${sc}); opacity: 1; filter: grayscale(1) brightness(${br}); z-index: ${z};`;
+}
+---
+
+<section id="bukti" class="border-t border-[rgba(232,220,206,0.12)] bg-[#121110]">
+  <div class="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-12 pt-20 pb-16 lg:pt-28 lg:pb-24" data-reveal>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end mb-10">
+      <div class="lg:col-span-7">
+        <h2 class="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-bold uppercase leading-[0.98] text-[#f3efe9]">
+          Rekam Jejak Nyata Alumni di Lapangan, Bukan Janji Instan
+        </h2>
+      </div>
+      <div class="lg:col-span-5">
+        <p class="text-[15px] sm:text-base text-[#b5aea4] leading-relaxed">
+          Setiap kreator di bawah ini melewati fase riset, koreksi naskah, dan iterasi distribusi yang sama. Pilih studi kasus untuk melihat tangkapan layar pertumbuhan akun dan monetisasi mereka.
+        </p>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div
+        role="tablist"
+        aria-label="Studi kasus alumni Akademi Creator"
+        class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0"
+      >
+        {
+          alumniCases.map((item, idx) => (
+            <button
+              type="button"
+              role="tab"
+              id={`alumni-tab-${item.id}`}
+              aria-selected={idx === 0 ? 'true' : 'false'}
+              aria-controls={`alumni-panel-${item.id}`}
+              data-alumni-tab={idx}
+              class:list={[
+                'min-h-11 px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap border transition-colors',
+                idx === 0
+                  ? 'bg-[#b84334] text-white border-[#d66151]'
+                  : 'bg-[#181614] text-[#b5aea4] border-[#736b63] hover:text-[#f3efe9] hover:border-[#a89f95]',
+              ]}
+            >
+              {item.name}
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+        <button
+          type="button"
+          id="alumni-prev"
+          aria-label="Studi kasus sebelumnya"
+          class="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg border border-[#736b63] bg-[#181614] text-[#f3efe9] hover:bg-[#221f1c] transition-colors"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          id="alumni-next"
+          aria-label="Studi kasus berikutnya"
+          class="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg border border-[#736b63] bg-[#181614] text-[#f3efe9] hover:bg-[#221f1c] transition-colors"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="surface-bezel">
+      <div class="surface-bezel-inner p-4 sm:p-6 lg:p-8">
+        {
+          alumniCases.map((item, idx) => (
+            <div
+              role="tabpanel"
+              id={`alumni-panel-${item.id}`}
+              aria-labelledby={`alumni-tab-${item.id}`}
+              data-alumni-panel={idx}
+              class={idx === 0 ? 'block' : 'hidden'}
+            >
+              <div class="overflow-hidden rounded-xl border border-[rgba(232,220,206,0.14)] bg-[#0f0e0d]">
+                <img
+                  src={item.image}
+                  alt={`Dokumentasi pencapaian alumni ${item.name} (${item.handle}) di Akademi Creator`}
+                  width="1960"
+                  height="998"
+                  loading="lazy"
+                  decoding="async"
+                  class="w-full h-auto object-cover"
+                />
+              </div>
+
+              <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pt-5 border-t border-[rgba(232,220,206,0.12)]">
+                <div class="lg:col-span-8">
+                  <div class="flex flex-wrap items-center gap-2.5 text-sm text-[#b5aea4] mb-1.5">
+                    <span class="font-semibold text-[#f3efe9]">{item.name}</span>
+                    <span aria-hidden="true">/</span>
+                    <span class="text-[#e87161] font-medium">{item.handle}</span>
+                  </div>
+                  <h3 class="text-xl sm:text-2xl font-bold text-[#f3efe9] leading-snug mb-2">
+                    {item.headline}
+                  </h3>
+                  <p class="text-sm sm:text-[15px] text-[#b5aea4] leading-relaxed max-w-3xl">
+                    {item.summary}
+                  </p>
+                </div>
+
+                {
+                  item.targetPrice ? (
+                    <PriceCounter
+                      value={item.targetPrice}
+                      label={item.metricLabel}
+                      prefix="Rp "
+                      align="right"
+                      class="lg:col-span-4"
+                    />
+                  ) : (
+                    <div class="lg:col-span-4 lg:text-right bg-[#1c1917] border border-[rgba(232,220,206,0.14)] rounded-xl p-4 sm:p-5">
+                      <div class="text-xs uppercase tracking-wider text-[#9e968c] mb-1">{item.metricLabel}</div>
+                      <div class="num-tabular text-xl sm:text-2xl font-bold text-[#f3efe9]">{item.metricValue}</div>
+                    </div>
+                  )
+                }
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <div id="profil-kreator" class="border-t border-[rgba(232,220,206,0.1)] bg-[#141210]">
+    <div class="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-12 py-20 lg:py-28" data-reveal>
+      <div class="mx-auto max-w-3xl text-center mb-8 sm:mb-10">
+        <h2 class="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-bold uppercase leading-[0.98] text-[#f3efe9]">
+          Profil Akun <span class="text-[#e87161]">Anggota Aktif</span> Lintas Profesi
+        </h2>
+        <p class="mt-4 text-[15px] sm:text-base text-[#b5aea4] leading-relaxed">
+          Dari pengajar bahasa, analis data, ibu rumah tangga, hingga pengrajin kayu. Klik kartu di sisi kipas, geser panggung, atau saring ceruk untuk memfokuskan tangkapan layar profil asli mereka.
+        </p>
+      </div>
+
+      <div
+        role="group"
+        aria-label="Saring ceruk kreator alumni"
+        class="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mb-6 sm:mb-8"
+      >
+        {
+          socialNiches.map((niche, idx) => (
+            <button
+              type="button"
+              data-social-niche={niche.id}
+              aria-pressed={idx === 0 ? 'true' : 'false'}
+              class:list={[
+                'min-h-11 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold border transition-colors',
+                idx === 0
+                  ? 'bg-[#b84334] text-white border-[#d66151]'
+                  : 'bg-[#1a1816] text-[#b5aea4] border-[#736b63] hover:text-[#f3efe9] hover:border-[#a89f95]',
+              ]}
+            >
+              {niche.label}
+            </button>
+          ))
+        }
+      </div>
+
+      <div
+        id="social-fan-region"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Galeri profil media sosial anggota Akademi Creator"
+        class="relative mx-auto max-w-[1160px] select-none"
+      >
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[440px] h-[360px] sm:h-[460px] rounded-full bg-[radial-gradient(circle,rgba(184,67,52,0.2)_0%,rgba(184,67,52,0)_70%)]"
+        />
+
+        <div
+          id="social-fan-stage"
+          class="relative h-[470px] sm:h-[545px] lg:h-[600px] w-full overflow-hidden flex items-center justify-center touch-pan-y"
+        >
+          <div
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-y-0 left-0 z-[42] w-8 sm:w-20 lg:w-32 bg-gradient-to-r from-[#141210] via-[#141210]/70 to-transparent"
+          />
+          <div
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-y-0 right-0 z-[42] w-8 sm:w-20 lg:w-32 bg-gradient-to-l from-[#141210] via-[#141210]/70 to-transparent"
+          />
+          <div
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-x-0 bottom-0 z-[42] h-20 sm:h-24 bg-gradient-to-t from-[#141210] via-[#141210]/80 to-transparent"
+          />
+
+          {
+            socialProfiles.map((prof, idx) => (
+              <button
+                type="button"
+                data-social-card={idx}
+                data-niche={prof.niche}
+                data-name={prof.name}
+                data-handle={prof.handle}
+                data-platform={prof.platform}
+                data-role={prof.role}
+                data-followers={prof.followers}
+                data-reach={prof.reach}
+                aria-label={`Fokuskan profil ${prof.name}, ${prof.role}, ${prof.followers}`}
+                aria-current={idx === 0 ? 'true' : 'false'}
+                tabindex={idx <= 3 || idx >= socialProfiles.length - 3 ? 0 : -1}
+                style={getInitialFanStyle(idx, socialProfiles.length)}
+                class="social-fan-card absolute w-[204px] sm:w-[232px] lg:w-[258px] aspect-[270/532] rounded-[18px] origin-bottom focus-visible:outline-2 focus-visible:outline-[#f08a7b] focus-visible:outline-offset-4"
+              >
+                <img
+                  src={prof.image}
+                  alt={`Tangkapan layar profil ${prof.platform} ${prof.name} (${prof.handle})`}
+                  width="270"
+                  height="532"
+                  loading="lazy"
+                  decoding="async"
+                  draggable="false"
+                  class="w-full h-full rounded-[18px] object-contain pointer-events-none ring-1 ring-white/15"
+                />
+              </button>
+            ))
+          }
+        </div>
+
+        <button
+          type="button"
+          id="social-fan-prev"
+          aria-label="Profil anggota sebelumnya"
+          class="btn-crimson absolute left-1 sm:left-3 lg:left-5 top-1/2 -translate-y-1/2 z-[55] w-11 h-11 sm:w-12 sm:h-12 rounded-full inline-flex items-center justify-center"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          id="social-fan-next"
+          aria-label="Profil anggota berikutnya"
+          class="btn-crimson absolute right-1 sm:right-3 lg:right-5 top-1/2 -translate-y-1/2 z-[55] w-11 h-11 sm:w-12 sm:h-12 rounded-full inline-flex items-center justify-center"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      <div
+        aria-live="polite"
+        class="mx-auto mt-3 max-w-[680px] rounded-2xl border border-[rgba(232,220,206,0.16)] bg-[#191715] px-5 py-4 sm:px-6 sm:py-5 shadow-[0_18px_38px_rgba(0,0,0,0.4)]"
+      >
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2 text-xs sm:text-[13px] text-[#b5aea4]">
+              <span
+                id="social-readout-index"
+                class="num-tabular inline-flex items-center rounded-md bg-[#25211e] border border-[#736b63] px-2 py-0.5 font-semibold text-[#f3efe9]"
+              >
+                01 / 13
+              </span>
+              <span id="social-readout-handle" class="font-semibold text-[#e87161]">
+                Instagram · @dimasgepeto
+              </span>
+              <span aria-hidden="true" class="text-[#736b63]">/</span>
+              <span id="social-readout-role" class="text-[#e8e2da]">Woodworking &amp; DIY</span>
+            </div>
+            <h3
+              id="social-readout-name"
+              class="mt-1.5 font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#f3efe9]"
+            >
+              Dimas Gepeto
+            </h3>
+          </div>
+
+          <div class="sm:text-right shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-[rgba(232,220,206,0.1)]">
+            <div id="social-readout-followers" class="num-tabular text-lg sm:text-xl font-bold text-[#f3efe9]">
+              762K Pengikut
+            </div>
+            <div id="social-readout-reach" class="num-tabular text-xs sm:text-[13px] text-[#b5aea4] mt-0.5">
+              5,4 Jt Tayangan / 30 Hari
+            </div>
+          </div>
+        </div>
+
+        <div aria-hidden="true" class="mt-4 h-1.5 w-full rounded-full bg-[#262320] overflow-hidden">
+          <div
+            id="social-readout-progress"
+            class="h-full rounded-full bg-[#e87161] transition-[width] duration-300 ease-out"
+            style="width: 7.7%;"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="ulasan-member" class="border-t border-[rgba(232,220,206,0.12)] bg-[#121110]">
+    <div class="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-12 py-20 lg:py-28" data-reveal>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end mb-8 sm:mb-10">
+        <div class="lg:col-span-7">
+          <h2 class="font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-bold uppercase leading-[0.98] text-[#f3efe9]">
+            Suara Anggota Komunitas Sejak 2019 dari <span class="text-[#e87161]">Berbagai Profesi</span>
+          </h2>
+        </div>
+        <div class="lg:col-span-5">
+          <p class="text-[15px] sm:text-base text-[#b5aea4] leading-relaxed">
+            Ulasan langsung anggota aktif mengenai kedalaman kurikulum video, diskusi harian sesama kreator, pemanfaatan AI, hingga sesi live rutin dan pendampingan pasca-kelas.
+          </p>
+        </div>
+      </div>
+
+      <div
+        role="group"
+        aria-label="Saring topik ulasan anggota"
+        class="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-8 lg:mb-10"
+      >
+        {
+          testimonyFilters.map((filter, idx) => (
+            <button
+              type="button"
+              data-testimony-filter={filter.id}
+              aria-pressed={idx === 0 ? 'true' : 'false'}
+              class:list={[
+                'min-h-11 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold border transition-colors',
+                idx === 0
+                  ? 'bg-[#f3efe9] text-[#121110] border-[#f3efe9]'
+                  : 'bg-[#181614] text-[#b5aea4] border-[#736b63] hover:text-[#f3efe9] hover:border-[#a89f95]',
+              ]}
+            >
+              {filter.label}
+            </button>
+          ))
+        }
+      </div>
+
+      <div
+        id="testimony-wall"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7 items-start lg:pb-7"
+      >
+        {
+          testimonyCards.map((card, idx) => (
+            <article
+              data-testimony-card={card.id}
+              data-category={card.category}
+              data-featured={card.featured ? 'true' : 'false'}
+              class:list={[
+                'rounded-2xl bg-[#ece7df] text-[#121110] p-7 sm:p-8 shadow-[0_18px_40px_rgba(0,0,0,0.44)] transition-transform duration-200 hover:-translate-y-1 flex flex-col justify-between',
+                card.featured ? '' : 'hidden',
+                card.featured && idx % 3 === 1 ? 'lg:translate-y-7' : '',
+              ]}
+            >
+              <p class="text-[17px] sm:text-[18px] leading-[1.52] text-[#171513] font-normal">
+                {card.quote}
+              </p>
+
+              <footer class="mt-7 pt-5 border-t border-[#d4cabd] flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full overflow-hidden shrink-0 bg-[#dad0c3]">
+                  <img
+                    src={card.avatar}
+                    alt={`Foto profil ${card.name}`}
+                    width="112"
+                    height="112"
+                    loading="lazy"
+                    decoding="async"
+                    class="w-full h-full object-cover scale-[1.06]"
+                  />
+                </div>
+                <div class="min-w-0">
+                  <h3 class="font-display text-[26px] sm:text-[28px] font-bold leading-[0.96] text-[#121110]">
+                    {card.name}
+                  </h3>
+                  <p class="mt-1.5 text-[13px] font-medium text-[#544c44] leading-snug">
+                    {card.context}
+                  </p>
+                </div>
+              </footer>
+            </article>
+          ))
+        }
+      </div>
+
+      <div id="testimony-toggle-wrap" class="mt-10 sm:mt-12 flex justify-center">
+        <button
+          type="button"
+          id="testimony-expand-btn"
+          aria-expanded="false"
+          class="btn-outline-warm min-h-11 px-6 py-3 rounded-xl text-sm font-semibold inline-flex items-center gap-2.5"
+        >
+          <span id="testimony-expand-label">Tampilkan 6 Ulasan Anggota Lainnya (Total 12)</span>
+          <svg
+            id="testimony-expand-icon"
+            class="w-4 h-4 transition-transform duration-200"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .social-fan-card {
+    transition:
+      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, opacity, filter;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .social-fan-card {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-alumni-tab]'));
+    const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-alumni-panel]'));
+    const prevBtn = document.getElementById('alumni-prev');
+    const nextBtn = document.getElementById('alumni-next');
+
+    if (tabs.length && panels.length) {
+      let activeIndex = 0;
+
+      const setActiveAlumni = (nextIdx: number, moveFocus = false) => {
+        activeIndex = (nextIdx + tabs.length) % tabs.length;
+        tabs.forEach((btn, idx) => {
+          const selected = idx === activeIndex;
+          btn.setAttribute('aria-selected', selected ? 'true' : 'false');
+          btn.classList.toggle('bg-[#b84334]', selected);
+          btn.classList.toggle('text-white', selected);
+          btn.classList.toggle('border-[#d66151]', selected);
+          btn.classList.toggle('bg-[#181614]', !selected);
+          btn.classList.toggle('text-[#b5aea4]', !selected);
+          btn.classList.toggle('border-[#736b63]', !selected);
+          if (selected && moveFocus) btn.focus();
+        });
+
+        panels.forEach((panel, idx) => {
+          panel.classList.toggle('hidden', idx !== activeIndex);
+          panel.classList.toggle('block', idx === activeIndex);
+        });
+
+        const activePanel = panels[activeIndex];
+        if (activePanel?.querySelector('[data-counter-price]')) {
+          document.dispatchEvent(
+            new CustomEvent('acre:trigger-counter', {
+              detail: { target: `#${activePanel.id} [data-counter-price]` },
+            })
+          );
+        }
+      };
+
+      tabs.forEach((btn, idx) => {
+        btn.addEventListener('click', () => setActiveAlumni(idx));
+        btn.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            setActiveAlumni(idx + 1, true);
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            setActiveAlumni(idx - 1, true);
+          }
+        });
+      });
+
+      prevBtn?.addEventListener('click', () => setActiveAlumni(activeIndex - 1));
+      nextBtn?.addEventListener('click', () => setActiveAlumni(activeIndex + 1));
+    }
+
+    const fanCards = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-social-card]'));
+    const nicheBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-social-niche]'));
+    const fanStage = document.getElementById('social-fan-stage');
+    const fanRegion = document.getElementById('social-fan-region');
+    const fanPrev = document.getElementById('social-fan-prev');
+    const fanNext = document.getElementById('social-fan-next');
+    const readoutIdx = document.getElementById('social-readout-index');
+    const readoutHandle = document.getElementById('social-readout-handle');
+    const readoutRole = document.getElementById('social-readout-role');
+    const readoutName = document.getElementById('social-readout-name');
+    const readoutFollowers = document.getElementById('social-readout-followers');
+    const readoutReach = document.getElementById('social-readout-reach');
+    const readoutProgress = document.getElementById('social-readout-progress');
+
+    if (fanCards.length) {
+      let currentNiche = 'all';
+      let activePoolPos = 0;
+
+      const getPool = () =>
+        currentNiche === 'all'
+          ? fanCards
+          : fanCards.filter((card) => card.dataset.niche === currentNiche);
+
+      const renderFan = () => {
+        const pool = getPool();
+        const total = pool.length;
+        if (!total) return;
+
+        activePoolPos = ((activePoolPos % total) + total) % total;
+        const vw = window.innerWidth;
+        const viewportCap = vw < 640 ? 1 : vw < 1024 ? 2 : 3;
+        const maxVisible = Math.min(viewportCap, Math.floor((total - 1) / 2));
+        const stepX = vw < 640 ? 86 : vw < 1024 ? 116 : 136;
+        const stepRot = vw < 640 ? 9 : vw < 1024 ? 10 : 10.5;
+        const centerLift = vw < 640 ? -4 : -8;
+        const centerScale = vw < 640 ? 1.04 : 1.06;
+
+        const poolSet = new Set(pool);
+
+        fanCards.forEach((card) => {
+          if (!poolSet.has(card)) {
+            card.style.transform = 'translate3d(0px, 120px, 0) scale(0.6)';
+            card.style.opacity = '0';
+            card.style.pointerEvents = 'none';
+            card.style.zIndex = '1';
+            card.tabIndex = -1;
+            card.setAttribute('aria-current', 'false');
+            card.setAttribute('aria-hidden', 'true');
+          }
+        });
+
+        pool.forEach((card, pos) => {
+          let d = pos - activePoolPos;
+          if (d > total / 2) d -= total;
+          if (d < -total / 2) d += total;
+          const abs = Math.abs(d);
+
+          if (abs > maxVisible) {
+            card.style.transform = `translate3d(${d > 0 ? stepX * 3.4 : -stepX * 3.4}px, 120px, 0) scale(0.62)`;
+            card.style.opacity = '0';
+            card.style.pointerEvents = 'none';
+            card.style.zIndex = '1';
+            card.tabIndex = -1;
+            card.setAttribute('aria-current', 'false');
+            card.setAttribute('aria-hidden', 'true');
+            return;
+          }
+
+          card.removeAttribute('aria-hidden');
+          card.style.pointerEvents = 'auto';
+          card.tabIndex = 0;
+
+          if (d === 0) {
+            card.style.transform = `translate3d(0px, ${centerLift}px, 0) rotate(0deg) scale(${centerScale})`;
+            card.style.opacity = '1';
+            card.style.filter = 'drop-shadow(0 28px 52px rgba(0,0,0,0.68))';
+            card.style.zIndex = '50';
+            card.setAttribute('aria-current', 'true');
+          } else {
+            const x = d * stepX;
+            const y = abs === 1 ? 24 : abs === 2 ? 58 : 98;
+            const rot = d * stepRot;
+            const sc = abs === 1 ? 0.89 : abs === 2 ? 0.79 : 0.69;
+            const br = abs === 1 ? 0.76 : abs === 2 ? 0.52 : 0.34;
+            card.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rot}deg) scale(${sc})`;
+            card.style.opacity = '1';
+            card.style.filter = `grayscale(1) brightness(${br})`;
+            card.style.zIndex = String(40 - abs * 10);
+            card.setAttribute('aria-current', 'false');
+          }
+        });
+
+        const activeCard = pool[activePoolPos];
+        if (activeCard) {
+          const pad = (n: number) => String(n).padStart(2, '0');
+          if (readoutIdx) readoutIdx.textContent = `${pad(activePoolPos + 1)} / ${pad(total)}`;
+          if (readoutHandle)
+            readoutHandle.textContent = `${activeCard.dataset.platform} · ${activeCard.dataset.handle}`;
+          if (readoutRole) readoutRole.textContent = activeCard.dataset.role || '';
+          if (readoutName) readoutName.textContent = activeCard.dataset.name || '';
+          if (readoutFollowers) readoutFollowers.textContent = activeCard.dataset.followers || '';
+          if (readoutReach) readoutReach.textContent = activeCard.dataset.reach || '';
+          if (readoutProgress) {
+            const pct = Math.max(8, Math.round(((activePoolPos + 1) / total) * 100));
+            readoutProgress.style.width = `${pct}%`;
+          }
+        }
+      };
+
+      fanCards.forEach((card) => {
+        card.addEventListener('click', () => {
+          const pool = getPool();
+          const clickedPos = pool.indexOf(card);
+          if (clickedPos === -1) return;
+          if (clickedPos === activePoolPos) {
+            activePoolPos = (activePoolPos + 1) % pool.length;
+          } else {
+            activePoolPos = clickedPos;
+          }
+          renderFan();
+        });
+      });
+
+      nicheBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          currentNiche = btn.dataset.socialNiche || 'all';
+          activePoolPos = 0;
+          nicheBtns.forEach((b) => {
+            const selected = b === btn;
+            b.setAttribute('aria-pressed', selected ? 'true' : 'false');
+            b.classList.toggle('bg-[#b84334]', selected);
+            b.classList.toggle('text-white', selected);
+            b.classList.toggle('border-[#d66151]', selected);
+            b.classList.toggle('bg-[#1a1816]', !selected);
+            b.classList.toggle('text-[#b5aea4]', !selected);
+            b.classList.toggle('border-[#736b63]', !selected);
+          });
+          renderFan();
+        });
+      });
+
+      fanPrev?.addEventListener('click', () => {
+        activePoolPos -= 1;
+        renderFan();
+      });
+
+      fanNext?.addEventListener('click', () => {
+        activePoolPos += 1;
+        renderFan();
+      });
+
+      fanRegion?.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          activePoolPos -= 1;
+          renderFan();
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          activePoolPos += 1;
+          renderFan();
+        }
+      });
+
+      let startX: number | null = null;
+      fanStage?.addEventListener('pointerdown', (e) => {
+        startX = e.clientX;
+      });
+      fanStage?.addEventListener('pointerup', (e) => {
+        if (startX === null) return;
+        const delta = e.clientX - startX;
+        startX = null;
+        if (Math.abs(delta) > 42) {
+          activePoolPos += delta < 0 ? 1 : -1;
+          renderFan();
+        }
+      });
+
+      let resizeTimer: number | undefined;
+      window.addEventListener('resize', () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(renderFan, 90);
+      });
+
+      renderFan();
+    }
+
+    const filterBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-testimony-filter]'));
+    const reviewCards = Array.from(document.querySelectorAll<HTMLElement>('[data-testimony-card]'));
+    const expandBtn = document.getElementById('testimony-expand-btn');
+    const expandWrap = document.getElementById('testimony-toggle-wrap');
+    const expandLabel = document.getElementById('testimony-expand-label');
+    const expandIcon = document.getElementById('testimony-expand-icon');
+
+    if (filterBtns.length && reviewCards.length) {
+      let activeFilter = 'featured';
+
+      const applyReviewFilter = (nextFilter: string) => {
+        activeFilter = nextFilter;
+
+        filterBtns.forEach((btn) => {
+          const selected = btn.dataset.testimonyFilter === activeFilter;
+          btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+          btn.classList.toggle('bg-[#f3efe9]', selected);
+          btn.classList.toggle('text-[#121110]', selected);
+          btn.classList.toggle('border-[#f3efe9]', selected);
+          btn.classList.toggle('bg-[#181614]', !selected);
+          btn.classList.toggle('text-[#b5aea4]', !selected);
+          btn.classList.toggle('border-[#736b63]', !selected);
+        });
+
+        let visibleIdx = 0;
+        reviewCards.forEach((card) => {
+          const matches =
+            activeFilter === 'all'
+              ? true
+              : activeFilter === 'featured'
+                ? card.dataset.featured === 'true'
+                : card.dataset.category === activeFilter;
+
+          card.classList.toggle('hidden', !matches);
+          card.classList.remove('lg:translate-y-7');
+          if (matches) {
+            if ((activeFilter === 'featured' || activeFilter === 'all') && visibleIdx % 3 === 1) {
+              card.classList.add('lg:translate-y-7');
+            }
+            visibleIdx += 1;
+          }
+        });
+
+        if (expandWrap && expandBtn && expandLabel && expandIcon) {
+          const showToggle = activeFilter === 'featured' || activeFilter === 'all';
+          expandWrap.classList.toggle('hidden', !showToggle);
+          const expanded = activeFilter === 'all';
+          expandBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+          expandLabel.textContent = expanded
+            ? 'Ringkas ke 6 Ulasan Pilihan'
+            : 'Tampilkan 6 Ulasan Anggota Lainnya (Total 12)';
+          expandIcon.classList.toggle('rotate-180', expanded);
+        }
+      };
+
+      filterBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          applyReviewFilter(btn.dataset.testimonyFilter || 'featured');
+        });
+      });
+
+      expandBtn?.addEventListener('click', () => {
+        applyReviewFilter(activeFilter === 'all' ? 'featured' : 'all');
+      });
+    }
+  })();
+</script>

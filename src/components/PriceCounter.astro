@@ -1,0 +1,135 @@
+---
+interface Props {
+  value: number;
+  label?: string;
+  prefix?: string;
+  duration?: number;
+  class?: string;
+  align?: 'left' | 'right' | 'center';
+}
+
+const {
+  value,
+  label = 'TOTAL OMZET TERDOKUMENTASI',
+  prefix = 'Rp ',
+  duration = 1800,
+  class: className = '',
+  align = 'right',
+} = Astro.props;
+
+const formattedInitial = `${prefix}${new Intl.NumberFormat('id-ID').format(value)}`;
+const alignClass = align === 'right' ? 'lg:text-right text-left' : align === 'center' ? 'text-center' : 'text-left';
+---
+
+<div
+  class={`bg-[#1c1917] border border-[rgba(232,220,206,0.14)] rounded-xl p-4 sm:p-5 ${alignClass} ${className} transition-all duration-300 hover:border-[rgba(232,220,206,0.28)] cursor-pointer group/counter select-none relative overflow-hidden`}
+  data-counter-card
+  title="Klik untuk memutar ulang animasi counter harga"
+>
+  {label && (
+    <div class="text-xs uppercase tracking-wider text-[#9e968c] mb-1 font-medium group-hover/counter:text-[#b5aea4] transition-colors">
+      {label}
+    </div>
+  )}
+  <div
+    class="num-tabular text-xl sm:text-2xl lg:text-3xl font-bold text-[#f3efe9] tracking-tight inline-block transition-transform duration-200"
+    data-counter-price={value}
+    data-counter-prefix={prefix}
+    data-counter-duration={duration}
+    role="text"
+    aria-label={formattedInitial}
+  >
+    {formattedInitial}
+  </div>
+</div>
+
+<script>
+  (() => {
+    function initPriceCounters() {
+      const counters = Array.from(document.querySelectorAll<HTMLElement>('[data-counter-price]'));
+      if (!counters.length) return;
+
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // easeOutQuart: smooth, punchy start with natural deceleration into the exact number
+      const easeOutQuart = (x: number) => 1 - Math.pow(1 - x, 4);
+
+      function runAnimation(el: HTMLElement) {
+        const targetStr = el.getAttribute('data-counter-price');
+        if (!targetStr) return;
+        const target = parseInt(targetStr, 10);
+        if (isNaN(target)) return;
+
+        const prefix = el.getAttribute('data-counter-prefix') || 'Rp ';
+        const duration = parseInt(el.getAttribute('data-counter-duration') || '1800', 10);
+
+        if (prefersReduced) {
+          el.textContent = `${prefix}${new Intl.NumberFormat('id-ID').format(target)}`;
+          return;
+        }
+
+        const existingAnim = (el as any)._counterAnim;
+        if (existingAnim) cancelAnimationFrame(existingAnim);
+
+        const startTime = performance.now();
+
+        function step(now: number) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const current = Math.round(easeOutQuart(progress) * target);
+
+          el.textContent = `${prefix}${new Intl.NumberFormat('id-ID').format(current)}`;
+
+          if (progress < 1) {
+            (el as any)._counterAnim = requestAnimationFrame(step);
+          } else {
+            el.textContent = `${prefix}${new Intl.NumberFormat('id-ID').format(target)}`;
+            (el as any)._counterAnim = null;
+            el.classList.add('scale-[1.03]', 'text-white');
+            setTimeout(() => el.classList.remove('scale-[1.03]', 'text-white'), 220);
+          }
+        }
+
+        (el as any)._counterAnim = requestAnimationFrame(step);
+      }
+
+      // IntersectionObserver for viewport entry
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const el = entry.target as HTMLElement;
+              runAnimation(el);
+              observer.unobserve(el);
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+
+      counters.forEach((el) => {
+        observer.observe(el);
+
+        const card = el.closest('[data-counter-card]') || el;
+        card.addEventListener('click', () => runAnimation(el));
+      });
+
+      // Listen for custom trigger event (e.g. tab activation)
+      document.addEventListener('acre:trigger-counter', (e: Event) => {
+        const customEvent = e as CustomEvent<{ target?: string }>;
+        const targetSelector = customEvent.detail?.target;
+        if (targetSelector) {
+          const matched = Array.from(document.querySelectorAll<HTMLElement>(targetSelector));
+          matched.forEach(runAnimation);
+        } else {
+          counters.forEach(runAnimation);
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPriceCounters);
+    } else {
+      initPriceCounters();
+    }
+  })();
+</script>

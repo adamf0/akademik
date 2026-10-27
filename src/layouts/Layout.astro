@@ -1,0 +1,88 @@
+---
+import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import { getUserFromSession, type UserSession } from '../lib/auth';
+
+interface Props {
+  title?: string;
+  description?: string;
+  hideNav?: boolean;
+  hideFooter?: boolean;
+  user?: UserSession | null;
+}
+
+const {
+  title = 'Akademi Creator: Akselerator Creatorpreneur 0 ke 100K Followers dalam 90 Hari',
+  description = 'Ekosistem edukasi dan pendampingan creatorpreneur Indonesia sejak 2019. Kurikulum 9 modul, 500+ video on-demand, e-book interaktif, dan mentoring 1-on-1 bersama Aldio Ogut.',
+  hideNav = false,
+  hideFooter = false,
+} = Astro.props;
+
+const currentUser = Astro.props.user !== undefined ? Astro.props.user : await getUserFromSession(Astro.cookies);
+---
+
+<!doctype html>
+<html lang="id" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+    <meta name="theme-color" content="#121110" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Montserrat:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script is:inline>
+      document.documentElement.classList.add('js-ready');
+    </script>
+  </head>
+  <body class="min-h-[100dvh] bg-[#121110] text-[#e8e2da] antialiased flex flex-col">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:px-4 focus:py-2.5 focus:rounded-lg focus:bg-[#b84334] focus:text-white focus:font-semibold"
+    >
+      Langsung ke konten utama
+    </a>
+
+    {!hideNav && <Navbar user={currentUser} />}
+
+    <main id="main-content" class="flex-1 w-full">
+      <slot />
+    </main>
+
+    {!hideFooter && <Footer />}
+
+    <script is:inline>
+      (() => {
+        const nodes = document.querySelectorAll('[data-reveal]');
+        if (!nodes.length) return;
+        if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          nodes.forEach((n) => n.classList.add('is-visible'));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.08, rootMargin: '0px 0px -32px 0px' }
+        );
+        nodes.forEach((n) => io.observe(n));
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,228 @@
+---
+import type { UserSession } from '../lib/auth';
+
+interface Props {
+  user?: UserSession | null;
+}
+
+const { user = null } = Astro.props;
+const currentPath = Astro.url.pathname;
+const isHome = currentPath === '/';
+---
+
+<header class="sticky top-0 z-50 w-full border-b border-[#e8dcce]/12 bg-[#121110]/90 backdrop-blur-md">
+  <div class="mx-auto flex h-[72px] max-w-[1360px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-12">
+    <a href="/" class="flex items-center gap-3 shrink-0 rounded-md py-1" aria-label="Beranda Akademi Creator Indonesia">
+      <img
+        src="/acre/logo-v2.png"
+        alt="Akademi Creator Indonesia"
+        width="168"
+        height="58"
+        class="h-8 sm:h-9 w-auto object-contain"
+      />
+    </a>
+
+    <nav aria-label="Navigasi utama" class="hidden lg:flex items-center gap-7 text-[14px] font-medium text-[#b5aea4]">
+      <a href={isHome ? '#kurikulum' : '/#kurikulum'} class="py-2 transition-colors hover:text-[#f3efe9]">
+        Kurikulum 9 Modul
+      </a>
+      <a href={isHome ? '#bukti' : '/#bukti'} class="py-2 transition-colors hover:text-[#f3efe9]">
+        Bukti Alumni
+      </a>
+      <a href={isHome ? '#mentor' : '/#mentor'} class="py-2 transition-colors hover:text-[#f3efe9]">
+        Mentor
+      </a>
+      <a
+        href="/products"
+        class={`py-2 transition-colors hover:text-[#f3efe9] ${currentPath.startsWith('/products') ? 'text-[#f3efe9] font-semibold' : ''}`}
+      >
+        Katalog &amp; Paket
+      </a>
+      {user && (
+        <a
+          href="/dashboard"
+          class={`py-2 transition-colors hover:text-[#f3efe9] ${currentPath === '/dashboard' || currentPath.startsWith('/classroom') ? 'text-[#f3efe9] font-semibold' : ''}`}
+        >
+          Ruang Belajar
+        </a>
+      )}
+      {user && (
+        <a
+          href="/dashboard/chat"
+          class={`py-2 transition-colors hover:text-[#f3efe9] ${currentPath === '/dashboard/chat' ? 'text-[#f3efe9] font-semibold' : ''}`}
+        >
+          Diskusi Mentor
+        </a>
+      )}
+      {user?.role === 'admin' && (
+        <a
+          href="/admin"
+          class={`py-2 transition-colors hover:text-[#f3efe9] ${currentPath.startsWith('/admin') ? 'text-[#e87161] font-semibold' : 'text-[#e87161]'}`}
+        >
+          Konsol Admin
+        </a>
+      )}
+    </nav>
+
+    <div class="hidden lg:flex items-center gap-3">
+      {user ? (
+        <div class="flex items-center gap-3">
+          <a
+            href={user.role === 'admin' ? '/admin' : '/dashboard'}
+            class="inline-flex min-h-[44px] items-center gap-2.5 rounded-lg border border-[#736b63] bg-[#181614] px-3.5 py-2 text-[13px] font-medium text-[#f3efe9] hover:border-[#a89f95] transition-colors"
+          >
+            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#b84334] text-[11px] font-bold text-white">
+              {user.name.charAt(0).toUpperCase()}
+            </span>
+            <span class="max-w-[140px] truncate">{user.name}</span>
+          </a>
+          <a
+            href="/api/auth/logout"
+            class="inline-flex min-h-[44px] items-center px-3 text-[13px] font-medium text-[#b5aea4] hover:text-[#f3efe9] transition-colors"
+          >
+            Keluar
+          </a>
+        </div>
+      ) : (
+        <>
+          <a
+            href="/auth/login"
+            class="inline-flex min-h-[44px] items-center justify-center rounded-lg px-4 text-[14px] font-medium text-[#e8e2da] hover:text-white hover:bg-[#e8dcce]/6 transition-colors"
+          >
+            Masuk Member
+          </a>
+          <a
+            href={isHome ? '#paket' : '/checkout?product=prod_bundle_ultimate'}
+            class="btn-crimson inline-flex min-h-[44px] items-center justify-center rounded-lg px-5 text-[14px] font-semibold tracking-wide"
+          >
+            Daftar Program 90 Hari
+          </a>
+        </>
+      )}
+    </div>
+
+    <div class="flex items-center gap-2 lg:hidden">
+      <a
+        href={user ? '/dashboard' : isHome ? '#paket' : '/products'}
+        class="btn-crimson inline-flex min-h-[44px] items-center justify-center rounded-lg px-3.5 text-[13px] font-semibold"
+      >
+        {user ? 'Kelas Saya' : 'Daftar'}
+      </a>
+      <button
+        type="button"
+        id="open-mobile-nav"
+        aria-haspopup="dialog"
+        aria-controls="mobile-nav-dialog"
+        class="btn-outline-warm inline-flex min-h-[44px] items-center gap-2 rounded-lg px-3.5 text-[13px] font-medium"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 8h16M4 16h16" />
+        </svg>
+        <span>Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<dialog
+  id="mobile-nav-dialog"
+  aria-label="Menu navigasi perangkat seluler"
+  class="m-0 ml-auto h-[100dvh] max-h-[100dvh] w-[min(88vw,360px)] max-w-none border-l border-[#e8dcce]/18 bg-[#141210] p-0 text-[#f3efe9] shadow-2xl"
+>
+  <div class="flex h-full flex-col justify-between p-6">
+    <div>
+      <div class="flex items-center justify-between border-b border-[#e8dcce]/12 pb-5">
+        <img src="/acre/logo-v2.png" alt="Akademi Creator" width="144" height="48" class="h-8 w-auto object-contain" />
+        <button
+          type="button"
+          id="close-mobile-nav"
+          class="btn-outline-warm inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg"
+          aria-label="Tutup menu navigasi"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+
+      <nav aria-label="Daftar halaman" class="mt-6 flex flex-col gap-1.5">
+        <a href={isHome ? '#kurikulum' : '/#kurikulum'} data-close-drawer class="flex min-h-[46px] items-center rounded-lg px-3 text-[15px] font-medium text-[#e8e2da] hover:bg-[#201d1a]">
+          Kurikulum 9 Modul
+        </a>
+        <a href={isHome ? '#bukti' : '/#bukti'} data-close-drawer class="flex min-h-[46px] items-center rounded-lg px-3 text-[15px] font-medium text-[#e8e2da] hover:bg-[#201d1a]">
+          Bukti Pertumbuhan Alumni
+        </a>
+        <a href={isHome ? '#mentor' : '/#mentor'} data-close-drawer class="flex min-h-[46px] items-center rounded-lg px-3 text-[15px] font-medium text-[#e8e2da] hover:bg-[#201d1a]">
+          Jajaran Mentor Praktisi
+        </a>
+        <a href="/products" class="flex min-h-[46px] items-center rounded-lg px-3 text-[15px] font-medium text-[#e8e2da] hover:bg-[#201d1a]">
+          Katalog &amp; Paket Bundling
+        </a>
+        <a href="/classroom/prod_course_100k/les_100k_1" class="flex min-h-[46px] items-center rounded-lg px-3 text-[15px] font-medium text-[#e8e2da] hover:bg-[#201d1a]">
+          Sampel Ruang Belajar LMS
+        </a>
+        {user && (
+          <>
+            <a href="/dashboard" class="flex min-h-[46px] items-center rounded-lg px-3 text-[15px] font-semibold text-[#f3efe9] hover:bg-[#201d1a]">
+              Ruang Belajar Saya
+            </a>
+            <a href="/dashboard/chat" class="flex min-h-[46px] items-center rounded-lg px-3 text-[15px] font-medium text-[#e8e2da] hover:bg-[#201d1a]">
+              Diskusi Privat Mentor
+            </a>
+          </>
+        )}
+        {user?.role === 'admin' && (
+          <a href="/admin" class="flex min-h-[46px] items-center rounded-lg px-3 text-[15px] font-semibold text-[#e87161] hover:bg-[#201d1a]">
+            Konsol Administrator
+          </a>
+        )}
+      </nav>
+    </div>
+
+    <div class="border-t border-[#e8dcce]/12 pt-5 flex flex-col gap-3">
+      {user ? (
+        <>
+          <div class="rounded-lg border border-[#e8dcce]/14 bg-[#181614] px-3.5 py-3 text-[13px]">
+            <p class="font-semibold text-[#f3efe9]">{user.name}</p>
+            <p class="text-[#9e968c] truncate">{user.email}</p>
+          </div>
+          <a href="/api/auth/logout" class="btn-outline-warm flex min-h-[46px] items-center justify-center rounded-lg text-[14px] font-semibold">
+            Keluar dari Akun
+          </a>
+        </>
+      ) : (
+        <>
+          <a href="/auth/login" class="btn-outline-warm flex min-h-[46px] items-center justify-center rounded-lg text-[14px] font-semibold">
+            Masuk Member Area
+          </a>
+          <a href="/checkout?product=prod_bundle_ultimate" class="btn-crimson flex min-h-[46px] items-center justify-center rounded-lg text-[14px] font-semibold">
+            Daftar Program 90 Hari
+          </a>
+        </>
+      )}
+    </div>
+  </div>
+</dialog>
+
+<script is:inline>
+  (() => {
+    const dialog = document.getElementById('mobile-nav-dialog');
+    const openBtn = document.getElementById('open-mobile-nav');
+    const closeBtn = document.getElementById('close-mobile-nav');
+    if (!dialog || !openBtn) return;
+
+    openBtn.addEventListener('click', () => {
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+    });
+
+    closeBtn?.addEventListener('click', () => dialog.close());
+
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    dialog.querySelectorAll('[data-close-drawer]').forEach((link) => {
+      link.addEventListener('click', () => dialog.close());
+    });
+  })();
+</script>

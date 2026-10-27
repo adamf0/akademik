@@ -1,0 +1,337 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { db } from '../../lib/db';
+import { getUserFromSession } from '../../lib/auth';
+import crypto from 'node:crypto';
+
+const user = await getUserFromSession(Astro.cookies);
+if (!user) {
+  return Astro.redirect('/auth/login?redirect=/dashboard/chat');
+}
+
+if (user.role === 'mentor' || user.role === 'admin') {
+  return Astro.redirect('/admin/chat');
+}
+
+let room = (await db.prepare('SELECT * FROM chat_rooms WHERE student_id = ? LIMIT 1').get(user.id)) as any;
+
+if (!room) {
+  const mentor = (await db.prepare("SELECT id FROM users WHERE role = 'mentor' LIMIT 1").get()) as any;
+  const mentorId = mentor?.id || 'user_mentor_1';
+  const roomId = 'chat_' + crypto.randomBytes(4).toString('hex');
+  const now = new Date().toISOString();
+
+  await db.prepare(`
+    INSERT INTO chat_rooms (id, student_id, mentor_id, course_id, title, updated_at)
+    VALUES (?, ?, ?, 'prod_course_100k', ?, ?)
+  `).run(roomId, user.id, mentorId, `Diskusi 1-on-1: ${user.name} & Aldio Ogut`, now);
+
+  await db.prepare(`
+    INSERT INTO chat_messages (id, room_id, sender_id, message, status, created_at)
+    VALUES (?, ?, ?, ?, 'DELIVERED', ?)
+  `).run(
+    'msg_' + crypto.randomBytes(4).toString('hex'),
+    roomId,
+    mentorId,
+    `Halo ${user.name}, selamat datang di ruang konsultasi 1-on-1 Akademi Creator. Silakan kirimkan draf kalimat pembuka (hook) atau kendala akunmu di sini.`,
+    now
+  );
+
+  room = await db.prepare('SELECT * FROM chat_rooms WHERE id = ?').get(roomId);
+}
+
+const messages = (await db
+  .prepare(`
+    SELECT cm.*, u.name as sender_name, u.role as sender_role, u.avatar as sender_avatar
+    FROM chat_messages cm
+    JOIN users u ON cm.sender_id = u.id
+    WHERE cm.room_id = ?
+    ORDER BY cm.created_at ASC
+  `)
+  .all(room.id)) as any[];
+
+const formatTime = (iso: string) =>
+  new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }).format(
+    new Date(iso)
+  );
+
+const starterPrompts = [
+  'Mas Ogut, mohon bedah kalimat pembuka (hook) 3 detik pertama untuk ceruk bisnis kuliner saya.',
+  'Tayangan video saya masih tertahan di kisaran 200 views. Apa yang perlu saya perbaiki lebih dulu?',
+  'Bagaimana langkah merancang produk digital pertama dari pertanyaan audiens?',
+];
+---
+
+<Layout
+  title="Ruang Konsultasi 1-on-1 Mentor | Akademi Creator"
+  description="Diskusi privat bedah akun, evaluasi naskah hook, dan strategi monetisasi bersama Aldio Ogut."
+  user={user}
+>
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-8 lg:py-12">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div>
+        <a href="/dashboard" class="text-xs font-semibold text-[#e87161] hover:underline">
+          Kembali ke Member Area
+        </a>
+        <h1 class="font-display text-3xl sm:text-4xl font-bold uppercase text-[#f3efe9] mt-1">
+          Ruang Konsultasi Privat 1-on-1
+        </h1>
+      </div>
+      <span class="px-3 py-1.5 rounded-lg border border-[rgba(232,220,206,0.18)] bg-[#181614] text-xs text-[#e8e2da]">
+        Mentor Pendamping: <strong class="text-[#f3efe9]">Aldio Ogut</strong>
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <aside class="lg:col-span-4 rounded-2xl border border-[rgba(232,220,206,0.16)] bg-[#181614] p-6 space-y-6">
+        <div class="flex items-center gap-4 pb-5 border-b border-[rgba(232,220,206,0.12)]">
+          <div class="w-16 h-16 rounded-xl overflow-hidden border border-[rgba(232,220,206,0.2)] shrink-0 bg-[#121110]">
+            <img
+              src="/acre/mentors/ogut.webp"
+              alt="Aldio Ogut"
+              width="128"
+              height="128"
+              class="w-full h-full object-cover scale-[1.04]"
+            />
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-[#f3efe9]">Aldio Ogut</h2>
+            <p class="text-xs text-[#e87161] font-medium">Founder & Head Mentor</p>
+            <p class="text-xs text-[#9e968c] mt-1">Fokus: Positioning, Retensi & Monetisasi</p>
+          </div>
+        </div>
+
+        <div class="space-y-2.5">
+          <div class="text-xs font-semibold uppercase tracking-wider text-[#b5aea4]">
+            Topik Konsultasi Cepat
+          </div>
+          <div class="space-y-2">
+            {
+              starterPrompts.map((prompt) => (
+                <button
+                  type="button"
+                  data-starter-prompt={prompt}
+                  class="w-full text-left p-3 rounded-xl border border-[#736b63] bg-[#121110] hover:border-[#e87161] text-xs text-[#e8e2da] leading-relaxed transition-colors"
+                >
+                  {prompt}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+      </aside>
+
+      <div class="lg:col-span-8 surface-bezel">
+        <div class="surface-bezel-inner flex flex-col h-[640px] max-h-[78dvh]">
+          <div class="px-5 py-4 border-b border-[rgba(232,220,206,0.12)] flex items-center justify-between">
+            <div>
+              <div class="text-sm font-bold text-[#f3efe9]">{room.title}</div>
+              <div class="text-xs text-[#9e968c]">Riwayat pesan tersimpan otomatis di akun belajar Anda</div>
+            </div>
+          </div>
+
+          <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4">
+            {
+              messages.map((msg) => {
+                const isMine = msg.sender_id === user.id;
+                const statusLabel = msg.status === 'READ' ? 'DIBACA' : msg.status === 'DELIVERED' ? 'DITERIMA' : 'TERKIRIM';
+                return (
+                  <div class:list={['flex flex-col max-w-[85%]', isMine ? 'ml-auto items-end' : 'mr-auto items-start']}>
+                    <div class="text-[11px] text-[#9e968c] mb-1 px-1">
+                      <span class="font-semibold text-[#b5aea4]">{isMine ? 'Anda' : msg.sender_name}</span>
+                      <span aria-hidden="true"> · </span>
+                      <span class="num-tabular">{formatTime(msg.created_at)}</span>
+                    </div>
+                    <div
+                      class:list={[
+                        'rounded-2xl px-4 py-3 text-sm leading-relaxed border',
+                        isMine
+                          ? 'bg-[#2a1917] text-[#f3efe9] border-[#b84334]'
+                          : 'bg-[#1e1b18] text-[#e8e2da] border-[rgba(232,220,206,0.16)]',
+                      ]}
+                    >
+                      <p class="whitespace-pre-line">{msg.message}</p>
+                      {msg.attachment_url && (
+                        <a
+                          href={msg.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="mt-2 inline-block text-xs font-semibold text-[#e87161] underline break-all"
+                        >
+                          Lampiran Tautan: {msg.attachment_url}
+                        </a>
+                      )}
+                    </div>
+                    {isMine && (
+                      <span class="text-[10px] font-semibold tracking-wider text-[#9e968c] mt-1 px-1">
+                        {statusLabel}
+                      </span>
+                    )}
+                  </div>
+                );
+              })
+            }
+          </div>
+
+          <form id="chat-form" data-room-id={room.id} class="p-4 border-t border-[rgba(232,220,206,0.12)] bg-[#121110] space-y-3">
+            <div id="chat-error" role="alert" class="hidden p-2.5 rounded-lg bg-[#301513] border border-[#e87161] text-xs text-[#f3efe9]"></div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+              <div class="sm:col-span-9">
+                <label for="chat-input" class="sr-only">Tulis pertanyaan atau draf naskah Anda</label>
+                <textarea
+                  id="chat-input"
+                  rows="2"
+                  required
+                  placeholder="Tulis draf kalimat pembuka (hook), kendala akun, atau tautan konten yang ingin dibedah..."
+                  class="input-warm w-full px-3.5 py-2.5 text-sm resize-none"
+                ></textarea>
+              </div>
+              <div class="sm:col-span-3 flex sm:flex-col justify-end">
+                <button
+                  type="submit"
+                  id="chat-send-btn"
+                  class="btn-crimson min-h-12 w-full px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold"
+                >
+                  Kirim Pesan
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label for="chat-attachment" class="sr-only">Tautan Google Drive atau Video Reels/TikTok (Opsional)</label>
+              <input
+                type="url"
+                id="chat-attachment"
+                placeholder="Opsional: Tempel tautan video Reels/TikTok atau Google Docs naskah Anda"
+                class="input-warm w-full min-h-10 px-3 py-1.5 text-xs"
+              />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  (() => {
+    const container = document.getElementById('chat-messages');
+    const form = document.getElementById('chat-form') as HTMLFormElement | null;
+    const input = document.getElementById('chat-input') as HTMLTextAreaElement | null;
+    const attachmentInput = document.getElementById('chat-attachment') as HTMLInputElement | null;
+    const sendBtn = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
+    const errorBox = document.getElementById('chat-error');
+
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+
+    document.querySelectorAll<HTMLButtonElement>('[data-starter-prompt]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!input) return;
+        input.value = btn.dataset.starterPrompt || '';
+        input.focus();
+      });
+    });
+
+    function appendBubble(opts: { sender: string; text: string; isMine: boolean; attachment?: string; status?: string }) {
+      if (!container) return;
+      const wrap = document.createElement('div');
+      wrap.className = `flex flex-col max-w-[85%] ${opts.isMine ? 'ml-auto items-end' : 'mr-auto items-start'}`;
+
+      const meta = document.createElement('div');
+      meta.className = 'text-[11px] text-[#9e968c] mb-1 px-1';
+      meta.textContent = `${opts.sender} · Baru saja`;
+
+      const bubble = document.createElement('div');
+      bubble.className = opts.isMine
+        ? 'rounded-2xl px-4 py-3 text-sm leading-relaxed border bg-[#2a1917] text-[#f3efe9] border-[#b84334]'
+        : 'rounded-2xl px-4 py-3 text-sm leading-relaxed border bg-[#1e1b18] text-[#e8e2da] border-[rgba(232,220,206,0.16)]';
+
+      const p = document.createElement('p');
+      p.className = 'whitespace-pre-line';
+      p.textContent = opts.text;
+      bubble.appendChild(p);
+
+      if (opts.attachment) {
+        const link = document.createElement('a');
+        link.href = opts.attachment;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.className = 'mt-2 inline-block text-xs font-semibold text-[#e87161] underline break-all';
+        link.textContent = `Lampiran Tautan: ${opts.attachment}`;
+        bubble.appendChild(link);
+      }
+
+      wrap.appendChild(meta);
+      wrap.appendChild(bubble);
+
+      if (opts.isMine) {
+        const st = document.createElement('span');
+        st.className = 'text-[10px] font-semibold tracking-wider text-[#9e968c] mt-1 px-1';
+        st.textContent = opts.status || 'TERKIRIM';
+        wrap.appendChild(st);
+      }
+
+      container.appendChild(wrap);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox?.classList.add('hidden');
+      const roomId = form.dataset.roomId || '';
+      const message = input?.value?.trim() || '';
+      const attachmentUrl = attachmentInput?.value?.trim() || '';
+
+      if (!message) return;
+
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Mengirim...';
+      }
+
+      try {
+        const res = await fetch('/api/chat/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roomId, message, attachmentUrl: attachmentUrl || undefined }),
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+          if (errorBox) {
+            errorBox.textContent = data.message || 'Pesan belum terkirim.';
+            errorBox.classList.remove('hidden');
+          }
+          return;
+        }
+
+        appendBubble({ sender: 'Anda', text: message, isMine: true, attachment: attachmentUrl || undefined, status: 'TERKIRIM' });
+        if (input) input.value = '';
+        if (attachmentInput) attachmentInput.value = '';
+
+        if (data.mentorReply?.message) {
+          setTimeout(() => {
+            appendBubble({
+              sender: 'Aldio Ogut (Founder & Head Mentor)',
+              text: data.mentorReply.message,
+              isMine: false,
+            });
+          }, 450);
+        }
+      } catch {
+        if (errorBox) {
+          errorBox.textContent = 'Terjadi kendala jaringan saat mengirim pesan.';
+          errorBox.classList.remove('hidden');
+        }
+      } finally {
+        if (sendBtn) {
+          sendBtn.disabled = false;
+          sendBtn.textContent = 'Kirim Pesan';
+        }
+      }
+    });
+  })();
+</script>

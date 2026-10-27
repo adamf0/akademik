@@ -1,0 +1,499 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { db } from '../lib/db';
+import { getUserFromSession } from '../lib/auth';
+
+const user = await getUserFromSession(Astro.cookies);
+const productIdParam = Astro.url.searchParams.get('product') || 'prod_bundle_ultimate';
+const initialVoucher = Astro.url.searchParams.get('voucher') || '';
+
+const allProducts = (await db.prepare('SELECT * FROM products ORDER BY featured DESC, price DESC').all()) as any[];
+const selectedProduct = allProducts.find((p) => p.id === productIdParam) || allProducts[0];
+
+const formatIDR = (val: number) =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+---
+
+<Layout
+  title="Pendaftaran & Pembayaran Program | Akademi Creator"
+  description="Selesaikan registrasi akun dan aktivasi materi belajar Akademi Creator dalam satu langkah."
+  user={user}
+>
+  <section class="max-w-6xl mx-auto px-5 sm:px-8 py-10 lg:py-16">
+    <div class="mb-8 pb-6 border-b border-[rgba(232,220,206,0.14)] flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div>
+        <h1 class="font-display text-3xl sm:text-5xl font-bold uppercase leading-[0.98] text-[#f3efe9] mb-2">
+          Registrasi & Aktivasi Akses Belajar
+        </h1>
+        <p class="text-sm sm:text-[15px] text-[#b5aea4]">
+          Akun siswa, materi kelas, dan ruang diskusi 1-on-1 bersama mentor langsung aktif begitu pembayaran selesai.
+        </p>
+      </div>
+      <a href="/products" class="text-xs sm:text-sm font-semibold text-[#e87161] hover:underline shrink-0">
+        Ganti dari Katalog
+      </a>
+    </div>
+
+    <form id="checkout-form" class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start" novalidate>
+      <div class="lg:col-span-7 space-y-6">
+        <div class="rounded-2xl border border-[rgba(232,220,206,0.16)] bg-[#181614] p-6">
+          <label for="co-product-select" class="block text-sm font-bold text-[#f3efe9] mb-3">
+            1. Program yang Dipilih
+          </label>
+          <select
+            id="co-product-select"
+            class="input-warm w-full min-h-12 px-4 py-3 text-sm font-medium"
+          >
+            {
+              allProducts.map((p) => (
+                <option value={p.id} selected={p.id === selectedProduct.id}>
+                  {p.title} ({formatIDR(p.price)})
+                </option>
+              ))
+            }
+          </select>
+        </div>
+
+        <div class="rounded-2xl border border-[rgba(232,220,206,0.16)] bg-[#181614] p-6">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h2 class="text-sm font-bold text-[#f3efe9]">
+              2. Data Akun Siswa Penerima Akses
+            </h2>
+            {!user && (
+              <a
+                href={`/auth/login?redirect=${encodeURIComponent(`/checkout?product=${selectedProduct.id}`)}`}
+                class="text-xs font-semibold text-[#e87161] hover:underline"
+              >
+                Sudah punya akun? Masuk di sini
+              </a>
+            )}
+          </div>
+
+          {user ? (
+            <div class="rounded-xl border border-[rgba(232,220,206,0.14)] bg-[#121110] p-4 flex items-center justify-between gap-4">
+              <div>
+                <div class="text-sm font-bold text-[#f3efe9]">{user.name}</div>
+                <div class="text-xs text-[#b5aea4] mt-0.5">{user.email}</div>
+              </div>
+              <span class="px-2.5 py-1 rounded bg-[#221f1c] border border-[rgba(232,220,206,0.16)] text-xs font-semibold text-[#e87161]">
+                Sesi Aktif
+              </span>
+            </div>
+          ) : (
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="co-name" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                  Nama Lengkap
+                </label>
+                <input
+                  type="text"
+                  id="co-name"
+                  name="name"
+                  required
+                  autocomplete="name"
+                  placeholder="Rian Pratama"
+                  class="input-warm w-full min-h-11 px-3.5 py-2.5 text-sm"
+                />
+              </div>
+
+              <div>
+                <label for="co-email" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                  Alamat Email Aktif
+                </label>
+                <input
+                  type="email"
+                  id="co-email"
+                  name="email"
+                  required
+                  autocomplete="email"
+                  placeholder="nama@email.com"
+                  class="input-warm w-full min-h-11 px-3.5 py-2.5 text-sm"
+                />
+              </div>
+
+              <div>
+                <label for="co-whatsapp" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                  Nomor WhatsApp
+                </label>
+                <input
+                  type="tel"
+                  id="co-whatsapp"
+                  name="whatsapp"
+                  required
+                  autocomplete="tel"
+                  placeholder="081298765432"
+                  class="input-warm w-full min-h-11 px-3.5 py-2.5 text-sm"
+                />
+              </div>
+
+              <div>
+                <label for="co-password" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                  Kata Sandi Akun Belajar
+                </label>
+                <input
+                  type="password"
+                  id="co-password"
+                  name="password"
+                  required
+                  minlength="6"
+                  autocomplete="new-password"
+                  placeholder="Minimal 6 karakter"
+                  class="input-warm w-full min-h-11 px-3.5 py-2.5 text-sm"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <fieldset class="rounded-2xl border border-[rgba(232,220,206,0.16)] bg-[#181614] p-6">
+          <legend class="text-sm font-bold text-[#f3efe9] px-1">
+            3. Metode Pembayaran Instan
+          </legend>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+            <label class="relative block">
+              <input type="radio" name="paymentMethod" value="qris" checked class="sr-only peer" />
+              <div class="min-h-16 p-4 rounded-xl border border-[#736b63] bg-[#121110] peer-checked:border-[#e87161] peer-checked:bg-[#221a18] peer-focus-visible:ring-2 peer-focus-visible:ring-[#f08a7b] transition-colors">
+                <div class="text-sm font-bold text-[#f3efe9]">QRIS Instan</div>
+                <div class="text-xs text-[#9e968c] mt-0.5">Semua Bank & Dompet Digital</div>
+              </div>
+            </label>
+
+            <label class="relative block">
+              <input type="radio" name="paymentMethod" value="va_bca" class="sr-only peer" />
+              <div class="min-h-16 p-4 rounded-xl border border-[#736b63] bg-[#121110] peer-checked:border-[#e87161] peer-checked:bg-[#221a18] peer-focus-visible:ring-2 peer-focus-visible:ring-[#f08a7b] transition-colors">
+                <div class="text-sm font-bold text-[#f3efe9]">Virtual Account</div>
+                <div class="text-xs text-[#9e968c] mt-0.5">BCA, Mandiri, BNI, BRI</div>
+              </div>
+            </label>
+
+            <label class="relative block">
+              <input type="radio" name="paymentMethod" value="ewallet" class="sr-only peer" />
+              <div class="min-h-16 p-4 rounded-xl border border-[#736b63] bg-[#121110] peer-checked:border-[#e87161] peer-checked:bg-[#221a18] peer-focus-visible:ring-2 peer-focus-visible:ring-[#f08a7b] transition-colors">
+                <div class="text-sm font-bold text-[#f3efe9]">GoPay / ShopeePay</div>
+                <div class="text-xs text-[#9e968c] mt-0.5">Konfirmasi Otomatis</div>
+              </div>
+            </label>
+          </div>
+        </fieldset>
+      </div>
+
+      <aside class="lg:col-span-5 lg:sticky lg:top-28">
+        <div class="surface-bezel">
+          <div class="surface-bezel-inner p-6 sm:p-7 space-y-6">
+            <h2 class="text-base font-bold text-[#f3efe9] pb-4 border-b border-[rgba(232,220,206,0.12)]">
+              Ringkasan Tagihan
+            </h2>
+
+            <div class="flex items-start gap-4">
+              <img
+                id="summary-cover"
+                src={selectedProduct.cover_image || '/acre/curriculum/fast-track.webp'}
+                alt={selectedProduct.title}
+                width="80"
+                height="80"
+                class="w-16 h-16 rounded-lg object-cover border border-[rgba(232,220,206,0.16)] shrink-0 bg-[#0e0d0c]"
+              />
+              <div class="min-w-0">
+                <div id="summary-type" class="text-[11px] uppercase tracking-wider font-semibold text-[#e87161]">
+                  {selectedProduct.type === 'bundle' ? 'Paket Terpadu' : selectedProduct.type === 'book' ? 'Buku & E-Book' : 'Kelas Intensif'}
+                </div>
+                <div id="summary-title" class="text-sm font-bold text-[#f3efe9] leading-snug mt-0.5">
+                  {selectedProduct.title}
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-[rgba(232,220,206,0.12)]">
+              <label for="voucher-input" class="block text-xs font-semibold text-[#e8e2da] mb-2">
+                Kode Kupon Potongan Harga
+              </label>
+              <div class="flex gap-2">
+                <input
+                  type="text"
+                  id="voucher-input"
+                  value={initialVoucher}
+                  placeholder="Ketik kode kupon"
+                  class="input-warm flex-1 min-h-11 px-3.5 py-2 text-sm uppercase font-mono"
+                />
+                <button
+                  type="button"
+                  id="apply-voucher-btn"
+                  class="btn-outline-warm min-h-11 px-4 rounded-xl text-xs font-bold shrink-0"
+                >
+                  Terapkan
+                </button>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-1.5 mt-2.5">
+                <span class="text-[11px] text-[#9e968c]">Kupon aktif:</span>
+                {
+                  ['CREATOR100K', 'LAUNCH50', 'HEMAT25'].map((code) => (
+                    <button
+                      type="button"
+                      data-voucher-chip={code}
+                      class="px-2 py-1 rounded border border-[#736b63] bg-[#121110] hover:border-[#e87161] text-[11px] font-mono text-[#e8e2da] transition-colors"
+                    >
+                      {code}
+                    </button>
+                  ))
+                }
+              </div>
+
+              <p id="voucher-feedback" role="status" aria-live="polite" class="hidden text-xs mt-2.5 font-medium"></p>
+            </div>
+
+            <div class="space-y-2.5 pt-4 border-t border-[rgba(232,220,206,0.12)] text-sm">
+              <div class="flex items-center justify-between text-[#b5aea4]">
+                <span>Harga Program</span>
+                <span id="summary-subtotal" class="num-tabular font-medium text-[#f3efe9]">
+                  {formatIDR(selectedProduct.price)}
+                </span>
+              </div>
+              <div id="discount-row" class="hidden items-center justify-between text-[#e87161]">
+                <span>Potongan Kupon (<span id="discount-code" class="font-mono"></span>)</span>
+                <span id="summary-discount" class="num-tabular font-semibold">-Rp 0</span>
+              </div>
+              <div class="flex items-baseline justify-between pt-3 border-t border-[rgba(232,220,206,0.14)]">
+                <span class="text-sm font-bold text-[#f3efe9]">Total Pembayaran</span>
+                <span id="summary-total" class="num-tabular font-display text-3xl font-bold text-[#f3efe9]">
+                  {formatIDR(selectedProduct.price)}
+                </span>
+              </div>
+            </div>
+
+            <div
+              id="checkout-error"
+              role="alert"
+              class="hidden p-3.5 rounded-xl bg-[#301513] border border-[#e87161] text-xs text-[#f3efe9] leading-relaxed"
+            >
+            </div>
+
+            <button
+              type="submit"
+              id="submit-checkout-btn"
+              class="btn-crimson min-h-12 w-full px-6 py-3.5 rounded-xl font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2"
+            >
+              <span>Bayar & Aktifkan Materi Sekarang</span>
+            </button>
+
+            <p class="text-[11px] text-[#9e968c] leading-relaxed text-center">
+              Dengan melanjutkan pembayaran, Anda menyetujui{' '}
+              <a href="/terms-and-privacy" class="underline hover:text-[#f3efe9]">
+                Syarat Layanan & Kebijakan Privasi
+              </a>{' '}
+              CV Akademi Creator Indonesia.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </form>
+  </section>
+</Layout>
+
+<script
+  is:inline
+  define:vars={{
+    productsCatalog: allProducts.map((p) => ({
+      id: p.id,
+      title: p.title,
+      type: p.type,
+      price: p.price,
+      cover_image: p.cover_image,
+    })),
+    initialProductId: selectedProduct.id,
+    isLoggedIn: Boolean(user),
+  }}
+>
+  (() => {
+    const productSelect = document.getElementById('co-product-select');
+    const voucherInput = document.getElementById('voucher-input');
+    const applyVoucherBtn = document.getElementById('apply-voucher-btn');
+    const voucherFeedback = document.getElementById('voucher-feedback');
+    const summaryCover = document.getElementById('summary-cover');
+    const summaryType = document.getElementById('summary-type');
+    const summaryTitle = document.getElementById('summary-title');
+    const summarySubtotal = document.getElementById('summary-subtotal');
+    const discountRow = document.getElementById('discount-row');
+    const discountCodeEl = document.getElementById('discount-code');
+    const summaryDiscount = document.getElementById('summary-discount');
+    const summaryTotal = document.getElementById('summary-total');
+    const form = document.getElementById('checkout-form');
+    const errorBox = document.getElementById('checkout-error');
+    const submitBtn = document.getElementById('submit-checkout-btn');
+
+    let currentProduct = productsCatalog.find((p) => p.id === initialProductId) || productsCatalog[0];
+    let activeVoucherCode = '';
+    let activeDiscount = 0;
+
+    function formatIDR(val) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+    }
+
+    function renderLedger() {
+      if (!currentProduct) return;
+      if (summaryCover) summaryCover.src = currentProduct.cover_image || '/acre/curriculum/fast-track.webp';
+      if (summaryTitle) summaryTitle.textContent = currentProduct.title;
+      if (summaryType) {
+        summaryType.textContent =
+          currentProduct.type === 'bundle'
+            ? 'Paket Terpadu'
+            : currentProduct.type === 'book'
+              ? 'Buku & E-Book'
+              : 'Kelas Intensif';
+      }
+      if (summarySubtotal) summarySubtotal.textContent = formatIDR(currentProduct.price);
+
+      const total = Math.max(0, currentProduct.price - activeDiscount);
+      if (activeDiscount > 0 && activeVoucherCode) {
+        discountRow?.classList.remove('hidden');
+        discountRow?.classList.add('flex');
+        if (discountCodeEl) discountCodeEl.textContent = activeVoucherCode;
+        if (summaryDiscount) summaryDiscount.textContent = '-' + formatIDR(activeDiscount);
+      } else {
+        discountRow?.classList.add('hidden');
+        discountRow?.classList.remove('flex');
+      }
+
+      if (summaryTotal) summaryTotal.textContent = formatIDR(total);
+    }
+
+    async function validateVoucher(codeRaw) {
+      const code = String(codeRaw || '').trim().toUpperCase();
+      if (!code || !currentProduct) return;
+
+      if (applyVoucherBtn) {
+        applyVoucherBtn.disabled = true;
+        applyVoucherBtn.textContent = 'Memeriksa...';
+      }
+
+      try {
+        const res = await fetch('/api/vouchers/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code,
+            subtotal: currentProduct.price,
+            productId: currentProduct.id,
+          }),
+        });
+        const data = await res.json();
+
+        if (voucherFeedback) {
+          voucherFeedback.classList.remove('hidden', 'text-[#e87161]', 'text-[#86efac]');
+          voucherFeedback.classList.add(data.valid ? 'text-[#86efac]' : 'text-[#e87161]');
+          voucherFeedback.textContent = data.message || '';
+        }
+
+        if (data.valid) {
+          activeVoucherCode = data.code;
+          activeDiscount = Number(data.discount) || 0;
+        } else {
+          activeVoucherCode = '';
+          activeDiscount = 0;
+        }
+        renderLedger();
+      } catch {
+        if (voucherFeedback) {
+          voucherFeedback.classList.remove('hidden');
+          voucherFeedback.classList.add('text-[#e87161]');
+          voucherFeedback.textContent = 'Gagal memeriksa kupon. Periksa koneksi Anda.';
+        }
+      } finally {
+        if (applyVoucherBtn) {
+          applyVoucherBtn.disabled = false;
+          applyVoucherBtn.textContent = 'Terapkan';
+        }
+      }
+    }
+
+    productSelect?.addEventListener('change', () => {
+      const next = productsCatalog.find((p) => p.id === productSelect.value);
+      if (!next) return;
+      currentProduct = next;
+      activeDiscount = 0;
+      activeVoucherCode = '';
+      if (voucherFeedback) voucherFeedback.classList.add('hidden');
+      renderLedger();
+      if (voucherInput?.value?.trim()) {
+        validateVoucher(voucherInput.value);
+      }
+    });
+
+    applyVoucherBtn?.addEventListener('click', () => {
+      validateVoucher(voucherInput?.value);
+    });
+
+    document.querySelectorAll('[data-voucher-chip]').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const code = chip.getAttribute('data-voucher-chip') || '';
+        if (voucherInput) voucherInput.value = code;
+        validateVoucher(code);
+      });
+    });
+
+    if (voucherInput?.value?.trim()) {
+      validateVoucher(voucherInput.value);
+    }
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox?.classList.add('hidden');
+
+      const paymentRadio = document.querySelector('input[name="paymentMethod"]:checked');
+      const payload = {
+        productId: currentProduct.id,
+        voucherCode: activeVoucherCode || undefined,
+        paymentMethod: paymentRadio ? paymentRadio.value : 'qris',
+      };
+
+      if (!isLoggedIn) {
+        payload.name = document.getElementById('co-name')?.value?.trim();
+        payload.email = document.getElementById('co-email')?.value?.trim();
+        payload.whatsapp = document.getElementById('co-whatsapp')?.value?.trim();
+        payload.password = document.getElementById('co-password')?.value || '';
+
+        if (!payload.name || !payload.email || payload.password.length < 6) {
+          if (errorBox) {
+            errorBox.textContent = 'Mohon lengkapi nama lengkap, alamat email aktif, dan kata sandi (minimal 6 karakter).';
+            errorBox.classList.remove('hidden');
+          }
+          return;
+        }
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Memverifikasi Pembayaran & Membuka Kelas...';
+      }
+
+      try {
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+
+        if (data.success && data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+          return;
+        }
+
+        if (errorBox) {
+          errorBox.textContent = data.message || 'Gagal memproses pendaftaran.';
+          errorBox.classList.remove('hidden');
+        }
+      } catch {
+        if (errorBox) {
+          errorBox.textContent = 'Terjadi gangguan jaringan saat menghubungi server pembayaran. Silakan coba kembali.';
+          errorBox.classList.remove('hidden');
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Bayar & Aktifkan Materi Sekarang';
+        }
+      }
+    });
+  })();
+</script>

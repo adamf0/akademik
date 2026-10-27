@@ -1,0 +1,171 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getUserFromSession } from '../../lib/auth';
+
+const user = await getUserFromSession(Astro.cookies);
+if (user) {
+  return Astro.redirect('/dashboard');
+}
+---
+
+<Layout
+  title="Daftar Akun Siswa Baru | Akademi Creator"
+  description="Buat akun siswa Akademi Creator untuk menyimpan progres kurikulum, riwayat pembelian, dan diskusi bersama mentor."
+>
+  <section class="max-w-xl mx-auto px-5 sm:px-8 py-12 lg:py-20">
+    <div class="surface-bezel">
+      <div class="surface-bezel-inner p-6 sm:p-9">
+        <h1 class="font-display text-3xl sm:text-4xl font-bold uppercase text-[#f3efe9] mb-2">
+          Buat Akun Siswa Baru
+        </h1>
+        <p class="text-sm text-[#b5aea4] mb-7">
+          Daftarkan identitas Anda terlebih dahulu, lalu pilih kelas atau buku kapan saja dari Member Area.
+        </p>
+
+        <form id="register-form" class="space-y-4" novalidate>
+          <div>
+            <label for="reg-name" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+              Nama Lengkap
+            </label>
+            <input
+              type="text"
+              id="reg-name"
+              required
+              autocomplete="name"
+              placeholder="Rian Pratama"
+              class="input-warm w-full min-h-11 px-4 py-2.5 text-sm"
+            />
+          </div>
+
+          <div>
+            <label for="reg-email" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+              Alamat Email Aktif
+            </label>
+            <input
+              type="email"
+              id="reg-email"
+              required
+              autocomplete="email"
+              placeholder="nama@email.com"
+              class="input-warm w-full min-h-11 px-4 py-2.5 text-sm"
+            />
+          </div>
+
+          <div>
+            <label for="reg-whatsapp" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+              Nomor WhatsApp
+            </label>
+            <input
+              type="tel"
+              id="reg-whatsapp"
+              required
+              autocomplete="tel"
+              placeholder="081298765432"
+              class="input-warm w-full min-h-11 px-4 py-2.5 text-sm"
+            />
+          </div>
+
+          <div>
+            <label for="reg-password" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+              Kata Sandi Baru
+            </label>
+            <input
+              type="password"
+              id="reg-password"
+              required
+              minlength="6"
+              autocomplete="new-password"
+              placeholder="Minimal 6 karakter"
+              class="input-warm w-full min-h-11 px-4 py-2.5 text-sm"
+            />
+          </div>
+
+          <div
+            id="reg-error"
+            role="alert"
+            class="hidden p-3.5 rounded-xl bg-[#301513] border border-[#e87161] text-xs text-[#f3efe9]"
+          >
+          </div>
+
+          <button
+            type="submit"
+            id="reg-btn"
+            class="btn-crimson min-h-12 w-full px-6 py-3 rounded-xl font-bold text-sm"
+          >
+            Buat Akun & Masuk ke Member Area
+          </button>
+        </form>
+
+        <div class="mt-6 pt-5 border-t border-[rgba(232,220,206,0.12)] flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-[#b5aea4]">
+          <span>
+            Sudah terdaftar?{' '}
+            <a href="/auth/login" class="font-semibold text-[#e87161] hover:underline">
+              Masuk di sini
+            </a>
+          </span>
+          <a href="/checkout?product=prod_bundle_ultimate" class="text-[#e8e2da] underline underline-offset-4 hover:text-[#e87161]">
+            Langsung daftar + ambil paket
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const form = document.getElementById('register-form') as HTMLFormElement | null;
+  const errorBox = document.getElementById('reg-error');
+  const btn = document.getElementById('reg-btn') as HTMLButtonElement | null;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox?.classList.add('hidden');
+
+    const name = (document.getElementById('reg-name') as HTMLInputElement)?.value?.trim();
+    const email = (document.getElementById('reg-email') as HTMLInputElement)?.value?.trim();
+    const whatsapp = (document.getElementById('reg-whatsapp') as HTMLInputElement)?.value?.trim();
+    const password = (document.getElementById('reg-password') as HTMLInputElement)?.value || '';
+
+    if (!name || !email || password.length < 6) {
+      if (errorBox) {
+        errorBox.textContent = 'Mohon isi nama lengkap, alamat email aktif, dan kata sandi minimal 6 karakter.';
+        errorBox.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Mendaftarkan Akun...';
+    }
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, whatsapp, password }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = data.redirectUrl || '/dashboard';
+        return;
+      }
+
+      if (errorBox) {
+        errorBox.textContent = data.message || 'Pendaftaran gagal. Silakan periksa kembali data Anda.';
+        errorBox.classList.remove('hidden');
+      }
+    } catch {
+      if (errorBox) {
+        errorBox.textContent = 'Terjadi gangguan jaringan. Silakan coba kembali.';
+        errorBox.classList.remove('hidden');
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Buat Akun & Masuk ke Member Area';
+      }
+    }
+  });
+</script>

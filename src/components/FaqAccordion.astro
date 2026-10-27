@@ -1,0 +1,93 @@
+---
+const faqs = [
+  {
+    q: 'Saya benar-benar mulai dari 0 pengikut dan belum pernah tampil di depan kamera. Apakah tetap bisa mengikuti?',
+    a: 'Sangat bisa. Modul 01 (Fast Track 15 Hari) dirancang khusus untuk akun baru dari titik nol: mulai dari menentukan topik keahlian, merancang naskah pendek yang tidak kaku, hingga opsi format konten edukasi tanpa harus selalu menampilkan wajah penuh.',
+  },
+  {
+    q: 'Apakah peralatan yang dibutuhkan harus kamera profesional atau mikrofon mahal?',
+    a: 'Tidak. Seluruh materi produksi kami dapat dieksekusi cukup menggunakan ponsel pintar yang Anda miliki saat ini dan pencahayaan alami dekat jendela. Fokus utama kurikulum adalah kekuatan kalimat pembuka (hook) dan ketajaman cerita.',
+  },
+  {
+    q: 'Berapa lama masa akses video materi, e-book, dan pembaruan kurikulumnya?',
+    a: 'Seluruh 500+ video on-demand dan e-book interaktif di akun belajar Anda dapat diakses ulang kapan saja tanpa biaya langganan bulanan, termasuk ketika tim kurikulum menambahkan pembaruan strategi algoritma.',
+  },
+  {
+    q: 'Bagaimana mekanisme diskusi 1-on-1 bersama mentor setelah saya mendaftar?',
+    a: 'Begitu pembayaran terkonfirmasi, sistem otomatis membuka Ruang Diskusi 1-on-1 di Member Area Anda. Anda dapat mengirimkan draf kalimat pembuka, tautan profil, atau rencana produk digital untuk dikoreksi terarah oleh mentor.',
+  },
+  {
+    q: 'Saya karyawan penuh waktu atau pemilik usaha dengan waktu terbatas. Berapa jam per hari yang diperlukan?',
+    a: 'Kurikulum disusun dalam potongan video ringkas berdurasi 10 hingga 25 menit per bab. Mayoritas anggota mengalokasikan 45 sampai 60 menit setiap malam untuk belajar satu bab dan menyiapkan draf konten keesokan harinya.',
+  },
+  {
+    q: 'Apa bedanya mengambil Kelas 100K satuan dengan Full-Stack Creatorpreneur Bundle?',
+    a: 'Kelas satuan berfokus pada satu keahlian spesifik, sedangkan Full-Stack Creatorpreneur Bundle menggabungkan Kelas 90 Hari (0 ke 100K), Kelas Digital Product & Webinar Hack, E-Book The Art of Story Telling, serta ruang konsultasi privat dengan penghematan 67%.',
+  },
+  {
+    q: 'Apakah ada jaminan pasti langsung viral dan menghasilkan ratusan juta tanpa praktik?',
+    a: 'Tidak ada. CV Akademi Creator Indonesia menolak klaim hasil instan tanpa kerja nyata. Kami menyediakan kerangka kerja teruji sejak 2019 dan koreksi mentor, sedangkan pertumbuhan akun bergantung penuh pada kedisiplinan eksekusi Anda.',
+  },
+];
+---
+
+<section id="faq" class="border-t border-[rgba(232,220,206,0.12)] bg-[#161412] py-20 lg:py-28">
+  <div class="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-12">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start" data-reveal>
+      <div class="lg:col-span-4 lg:sticky lg:top-28">
+        <h2 class="font-display text-4xl sm:text-5xl font-bold uppercase leading-[0.98] text-[#f3efe9] mb-4">
+          Pertanyaan yang Paling Sering Ditanyakan Calon Siswa
+        </h2>
+        <p class="text-[15px] text-[#b5aea4] leading-relaxed mb-7">
+          Masih menimbang program mana yang paling relevan dengan kondisi akun atau bisnis Anda saat ini? Tim admisi kami siap membantu memberikan rekomendasi jujur.
+        </p>
+
+        <div class="rounded-2xl border border-[rgba(232,220,206,0.16)] bg-[#121110] p-6 space-y-4">
+          <div>
+            <div class="text-xs uppercase tracking-wider text-[#9e968c] mb-1">Konsultasi Admisi Resmi</div>
+            <div class="text-base font-bold text-[#f3efe9]">CV Akademi Creator Indonesia</div>
+            <div class="text-xs text-[#b5aea4] mt-0.5">Senin sampai Sabtu, 09.00 hingga 18.00 WIB</div>
+          </div>
+
+          <a
+            href="https://wa.me/628114089090?text=Halo%20Tim%20Akademi%20Creator,%20saya%20ingin%20berkonsultasi%20mengenai%20program%20belajar."
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-outline-warm min-h-11 w-full px-4 py-3 rounded-xl text-sm font-semibold inline-flex items-center justify-center gap-2.5"
+          >
+            <span>Hubungi via WhatsApp (+62 811-4089-090)</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="lg:col-span-8 divide-y divide-[rgba(232,220,206,0.14)] border-y border-[rgba(232,220,206,0.14)]">
+        {
+          faqs.map((item, idx) => (
+            <details class="group py-2" open={idx === 0}>
+              <summary class="list-none flex items-center justify-between gap-4 py-4 min-h-12 text-left font-semibold text-base sm:text-lg text-[#f3efe9] hover:text-[#e87161] transition-colors">
+                <span>{item.q}</span>
+                <span
+                  aria-hidden="true"
+                  class="w-9 h-9 rounded-lg border border-[#736b63] bg-[#1c1917] inline-flex items-center justify-center shrink-0 text-[#f3efe9]"
+                >
+                  <svg
+                    class="w-4 h-4 transition-transform duration-200 group-open:rotate-45"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                  </svg>
+                </span>
+              </summary>
+              <div class="pb-5 pr-12 text-sm sm:text-[15px] text-[#b5aea4] leading-relaxed">
+                {item.a}
+              </div>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>

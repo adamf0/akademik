@@ -1,0 +1,26 @@
+{
+  "name": "wonderful-noether",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev --port 4321",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "start": "node ./dist/server/entry.mjs",
+    "test": "node ./tests/render-test.mjs"
+  },
+  "keywords": [],
+  "author": "CV Akademi Creator Indonesia",
+  "license": "ISC",
+  "description": "Akademi Creator - Creatorpreneur Accelerator, Storefront & LMS Platform",
+  "dependencies": {
+    "@astrojs/node": "^11.1.9",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.8",
+    "mariadb": "^3.5.4",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

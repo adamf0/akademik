@@ -1,0 +1,269 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { db } from '../../lib/db';
+
+const products = (await db.prepare('SELECT * FROM products ORDER BY featured DESC, price DESC').all()) as any[];
+
+const formatIDR = (val: number) =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+
+const typeLabel: Record<string, string> = {
+  bundle: 'Paket Bundling',
+  course: 'Kelas Intensif',
+  book: 'Buku & E-Book',
+};
+---
+
+<Layout
+  title="Katalog Kelas, Buku & Paket Bundling | Akademi Creator"
+  description="Pilih kelas akselerator 90 hari, modul monetisasi produk digital, e-book storytelling, atau paket terpadu Full-Stack Creatorpreneur."
+>
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-12 lg:py-20">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pb-10 border-b border-[rgba(232,220,206,0.14)]">
+      <div class="lg:col-span-7">
+        <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-bold uppercase leading-[0.96] text-[#f3efe9] mb-3">
+          Katalog Program Belajar & Buku Pegangan Kreator
+        </h1>
+        <p class="text-[15px] sm:text-base text-[#b5aea4] leading-relaxed max-w-2xl">
+          Setiap program dirancang langsung oleh praktisi Akademi Creator dengan langkah eksekusi terukur, lembar kerja praktis, dan akses langsung di ruang kelas digital.
+        </p>
+      </div>
+
+      <div class="lg:col-span-5">
+        <label for="catalog-search" class="block text-xs font-semibold uppercase tracking-wider text-[#b5aea4] mb-2">
+          Cari Topik atau Nama Program
+        </label>
+        <div class="relative">
+          <input
+            type="search"
+            id="catalog-search"
+            placeholder="Misal: Storytelling, 100K, Webinar..."
+            class="input-warm w-full min-h-11 pl-10 pr-4 py-2.5 text-sm"
+          />
+          <svg
+            class="w-4 h-4 text-[#9e968c] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path stroke-linecap="round" d="M20 20l-3.5-3.5" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-4 py-6">
+      <div role="group" aria-label="Filter kategori produk" class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          data-filter="all"
+          aria-pressed="true"
+          class="catalog-filter min-h-11 px-4 py-2 rounded-lg text-sm font-semibold border bg-[#b84334] text-white border-[#d66151] transition-colors"
+        >
+          Semua ({products.length})
+        </button>
+        <button
+          type="button"
+          data-filter="bundle"
+          aria-pressed="false"
+          class="catalog-filter min-h-11 px-4 py-2 rounded-lg text-sm font-semibold border bg-[#181614] text-[#b5aea4] border-[#736b63] hover:text-[#f3efe9] transition-colors"
+        >
+          Paket Bundling
+        </button>
+        <button
+          type="button"
+          data-filter="course"
+          aria-pressed="false"
+          class="catalog-filter min-h-11 px-4 py-2 rounded-lg text-sm font-semibold border bg-[#181614] text-[#b5aea4] border-[#736b63] hover:text-[#f3efe9] transition-colors"
+        >
+          Kelas Intensif
+        </button>
+        <button
+          type="button"
+          data-filter="book"
+          aria-pressed="false"
+          class="catalog-filter min-h-11 px-4 py-2 rounded-lg text-sm font-semibold border bg-[#181614] text-[#b5aea4] border-[#736b63] hover:text-[#f3efe9] transition-colors"
+        >
+          Buku & E-Book
+        </button>
+      </div>
+
+      <div class="text-xs sm:text-sm text-[#9e968c]">
+        Menampilkan <span id="catalog-count" class="num-tabular font-semibold text-[#f3efe9]">{products.length}</span> program tersedia
+      </div>
+    </div>
+
+    <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {
+        products.map((product) => {
+          const savingsPercent =
+            product.original_price > product.price
+              ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+              : 0;
+
+          return (
+            <article
+              data-product-card
+              data-type={product.type}
+              data-search={`${product.title} ${product.tagline || ''} ${product.description || ''}`.toLowerCase()}
+              class:list={[
+                'rounded-2xl overflow-hidden flex flex-col justify-between border transition-colors',
+                product.type === 'bundle'
+                  ? 'bg-[#1b1715] border-[#b84334]'
+                  : 'surface-atelier hover:border-[#736b63]',
+              ]}
+            >
+              <div>
+                <a
+                  href={`/products/${product.slug}`}
+                  class="flex items-center justify-center aspect-[4/3] overflow-hidden bg-gradient-to-b from-[#1c1916] to-[#11100f] p-4 relative border-b border-[rgba(232,220,206,0.1)]"
+                >
+                  <img
+                    src={product.cover_image || '/acre/curriculum/fast-track.webp'}
+                    alt={product.title}
+                    width="480"
+                    height="600"
+                    loading="lazy"
+                    decoding="async"
+                    class="h-full w-auto object-contain rounded-lg shadow-[0_14px_32px_rgba(0,0,0,0.6)] transition-transform duration-300 hover:scale-[1.03]"
+                  />
+                  <div class="absolute top-3 left-3 flex flex-wrap gap-2">
+                    <span class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-[#121110]/90 text-[#f3efe9] border border-[rgba(232,220,206,0.2)]">
+                      {typeLabel[product.type] || 'Program'}
+                    </span>
+                    {savingsPercent > 0 && (
+                      <span class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-[#b84334] text-white">
+                        Hemat {savingsPercent}%
+                      </span>
+                    )}
+                  </div>
+                </a>
+
+                <div class="p-6">
+                  <h2 class="text-xl font-bold text-[#f3efe9] leading-snug mb-2">
+                    <a href={`/products/${product.slug}`} class="hover:text-[#e87161] transition-colors">
+                      {product.title}
+                    </a>
+                  </h2>
+                  <p class="text-sm text-[#b5aea4] leading-relaxed line-clamp-3 mb-4">
+                    {product.tagline || product.description}
+                  </p>
+                  {product.curriculum_summary && (
+                    <p class="text-xs text-[#9e968c] pt-3 border-t border-[rgba(232,220,206,0.1)] leading-relaxed">
+                      {product.curriculum_summary}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div class="px-6 pb-6 pt-3 border-t border-[rgba(232,220,206,0.1)] flex items-end justify-between gap-4">
+                <div>
+                  {product.original_price > product.price && (
+                    <div class="num-tabular text-xs text-[#9e968c] line-through">
+                      {formatIDR(product.original_price)}
+                    </div>
+                  )}
+                  <div class="num-tabular text-2xl font-bold text-[#f3efe9]">{formatIDR(product.price)}</div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <a
+                    href={`/products/${product.slug}`}
+                    class="min-h-11 px-3 inline-flex items-center text-xs font-semibold text-[#b5aea4] hover:text-[#f3efe9]"
+                  >
+                    Rincian
+                  </a>
+                  <a
+                    href={`/checkout?product=${product.id}`}
+                    class:list={[
+                      'min-h-11 px-4 inline-flex items-center justify-center rounded-xl text-xs font-bold whitespace-nowrap',
+                      product.type === 'bundle' ? 'btn-crimson' : 'btn-outline-warm',
+                    ]}
+                  >
+                    Ambil Akses
+                  </a>
+                </div>
+              </div>
+            </article>
+          );
+        })
+      }
+    </div>
+
+    <div
+      id="catalog-empty"
+      class="hidden rounded-2xl border border-[rgba(232,220,206,0.16)] bg-[#181614] p-10 text-center my-8"
+    >
+      <h2 class="text-xl font-bold text-[#f3efe9] mb-2">Tidak ada program yang cocok dengan pencarian Anda</h2>
+      <p class="text-sm text-[#b5aea4] max-w-md mx-auto mb-6">
+        Coba gunakan kata kunci yang lebih umum atau tampilkan kembali seluruh kategori katalog.
+      </p>
+      <button
+        type="button"
+        id="catalog-reset"
+        class="btn-outline-warm min-h-11 px-5 py-2.5 rounded-xl text-sm font-semibold"
+      >
+        Tampilkan Semua Program
+      </button>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  (() => {
+    const filterButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.catalog-filter'));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-product-card]'));
+    const searchInput = document.getElementById('catalog-search') as HTMLInputElement | null;
+    const countEl = document.getElementById('catalog-count');
+    const emptyEl = document.getElementById('catalog-empty');
+    const gridEl = document.getElementById('catalog-grid');
+    const resetBtn = document.getElementById('catalog-reset');
+
+    let activeCategory = 'all';
+
+    function applyFilters() {
+      const query = (searchInput?.value || '').trim().toLowerCase();
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const type = card.dataset.type || '';
+        const text = card.dataset.search || '';
+        const matchCat = activeCategory === 'all' || type === activeCategory;
+        const matchQuery = !query || text.includes(query);
+        const show = matchCat && matchQuery;
+        card.classList.toggle('hidden', !show);
+        if (show) visibleCount++;
+      });
+
+      if (countEl) countEl.textContent = String(visibleCount);
+      emptyEl?.classList.toggle('hidden', visibleCount > 0);
+      gridEl?.classList.toggle('hidden', visibleCount === 0);
+    }
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        activeCategory = btn.dataset.filter || 'all';
+        filterButtons.forEach((b) => {
+          const active = b === btn;
+          b.setAttribute('aria-pressed', active ? 'true' : 'false');
+          b.classList.toggle('bg-[#b84334]', active);
+          b.classList.toggle('text-white', active);
+          b.classList.toggle('border-[#d66151]', active);
+          b.classList.toggle('bg-[#181614]', !active);
+          b.classList.toggle('text-[#b5aea4]', !active);
+          b.classList.toggle('border-[#736b63]', !active);
+        });
+        applyFilters();
+      });
+    });
+
+    searchInput?.addEventListener('input', applyFilters);
+
+    resetBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      filterButtons[0]?.click();
+    });
+  })();
+</script>

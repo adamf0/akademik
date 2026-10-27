@@ -1,0 +1,291 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { db } from '../../lib/db';
+import { getUserFromSession } from '../../lib/auth';
+
+const user = await getUserFromSession(Astro.cookies);
+const isAuthorized = Boolean(user && user.role === 'admin');
+
+const products = isAuthorized
+  ? ((await db.prepare('SELECT * FROM products ORDER BY created_at DESC').all()) as any[])
+  : [];
+
+const formatIDR = (val: number) =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+---
+
+<Layout
+  title="Manajemen Katalog Produk | Konsol Admin Akademi Creator"
+  description="Tambah dan kelola kelas online, buku cetak, e-book digital, serta paket bundling."
+  user={user}
+>
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-10 lg:py-14">
+    {!isAuthorized ? (
+      <div class="max-w-xl mx-auto rounded-2xl border border-[rgba(232,220,206,0.18)] bg-[#181614] p-8 space-y-5 text-center">
+        <h1 class="font-display text-3xl font-bold uppercase text-[#f3efe9]">
+          Akses Khusus Administrator Operasional
+        </h1>
+        <p class="text-sm text-[#b5aea4]">Aktifkan sesi Administrator untuk menambah atau memperbarui produk katalog.</p>
+        <a
+          href="/api/auth/demo?role=admin&redirect=/admin/products"
+          class="btn-crimson min-h-11 px-6 py-3 rounded-xl text-sm font-bold inline-flex items-center"
+        >
+          Aktifkan Sesi Admin Operasional
+        </a>
+      </div>
+    ) : (
+      <div class="space-y-10">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 pb-6 border-b border-[rgba(232,220,206,0.14)]">
+          <div>
+            <h1 class="font-display text-3xl sm:text-5xl font-bold uppercase leading-[0.98] text-[#f3efe9]">
+              Manajemen Katalog Produk
+            </h1>
+            <p class="text-sm text-[#b5aea4] mt-1">
+              Terbitkan kelas baru, buku pegangan, atau paket terpadu langsung ke halaman katalog depan.
+            </p>
+          </div>
+
+          <nav aria-label="Menu Konsol Admin" class="flex flex-wrap items-center gap-2">
+            <a href="/admin" class="btn-outline-warm min-h-11 px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center">
+              Ringkasan
+            </a>
+            <a
+              href="/admin/products"
+              aria-current="page"
+              class="min-h-11 px-4 py-2 rounded-lg text-xs font-bold bg-[#b84334] text-white border border-[#d66151] inline-flex items-center"
+            >
+              Katalog Produk
+            </a>
+            <a href="/admin/vouchers" class="btn-outline-warm min-h-11 px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center">
+              Kupon Promo
+            </a>
+            <a href="/admin/chat" class="btn-outline-warm min-h-11 px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center">
+              Meja Diskusi Mentor
+            </a>
+          </nav>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div class="lg:col-span-5 surface-bezel">
+            <div class="surface-bezel-inner p-6 sm:p-7">
+              <h2 class="text-lg font-bold text-[#f3efe9] mb-5">Tambah Produk Katalog Baru</h2>
+
+              <form id="admin-product-form" class="space-y-4" novalidate>
+                <div>
+                  <label for="prod-title" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                    Judul Program atau Buku
+                  </label>
+                  <input
+                    type="text"
+                    id="prod-title"
+                    required
+                    placeholder="Misal: Kelas Copywriting Reels 30 Hari"
+                    class="input-warm w-full min-h-11 px-3.5 py-2.5 text-sm"
+                  />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label for="prod-type" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                      Kategori
+                    </label>
+                    <select id="prod-type" class="input-warm w-full min-h-11 px-3 py-2.5 text-sm">
+                      <option value="course">Kelas Intensif</option>
+                      <option value="book">Buku & E-Book</option>
+                      <option value="bundle">Paket Bundling</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label for="prod-badge" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                      Label Sorotan (Opsional)
+                    </label>
+                    <input
+                      type="text"
+                      id="prod-badge"
+                      placeholder="Rilis Baru"
+                      class="input-warm w-full min-h-11 px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label for="prod-price" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                      Harga Jual (IDR)
+                    </label>
+                    <input
+                      type="number"
+                      id="prod-price"
+                      required
+                      min="0"
+                      placeholder="299000"
+                      class="input-warm num-tabular w-full min-h-11 px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label for="prod-original" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                      Harga Normal Coret (IDR)
+                    </label>
+                    <input
+                      type="number"
+                      id="prod-original"
+                      min="0"
+                      placeholder="599000"
+                      class="input-warm num-tabular w-full min-h-11 px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label for="prod-tagline" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                    Ringkasan Singkat
+                  </label>
+                  <input
+                    type="text"
+                    id="prod-tagline"
+                    placeholder="Panduan taktis menulis naskah video pendek berkonversi tinggi."
+                    class="input-warm w-full min-h-11 px-3.5 py-2.5 text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label for="prod-desc" class="block text-xs font-semibold text-[#e8e2da] mb-1.5">
+                    Deskripsi Lengkap Program
+                  </label>
+                  <textarea
+                    id="prod-desc"
+                    rows="3"
+                    placeholder="Jelaskan cakupan modul, format materi, dan target hasil belajar siswa..."
+                    class="input-warm w-full px-3.5 py-2.5 text-sm"
+                  ></textarea>
+                </div>
+
+                <div id="prod-feedback" role="status" aria-live="polite" class="hidden p-3 rounded-xl text-xs border"></div>
+
+                <button
+                  type="submit"
+                  id="prod-submit"
+                  class="btn-crimson min-h-12 w-full px-5 py-3 rounded-xl text-sm font-bold"
+                >
+                  Simpan ke Katalog
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 space-y-4">
+            <h2 class="text-lg font-bold text-[#f3efe9]">Daftar Produk Aktif ({products.length})</h2>
+
+            <div class="space-y-3">
+              {products.map((item) => (
+                <article class="surface-atelier rounded-xl p-4 sm:p-5 flex items-center justify-between gap-4">
+                  <div class="flex items-center gap-4 min-w-0">
+                    <img
+                      src={item.cover_image || '/acre/curriculum/fast-track.webp'}
+                      alt={item.title}
+                      width="64"
+                      height="64"
+                      class="w-14 h-14 rounded-lg object-cover border border-[rgba(232,220,206,0.14)] shrink-0 bg-[#0e0d0c]"
+                    />
+                    <div class="min-w-0">
+                      <div class="text-[11px] uppercase tracking-wider font-semibold text-[#e87161]">
+                        {item.type} {item.badge ? `· ${item.badge}` : ''}
+                      </div>
+                      <h3 class="text-sm sm:text-base font-bold text-[#f3efe9] truncate">{item.title}</h3>
+                      <div class="text-xs text-[#9e968c] font-mono truncate">/products/{item.slug}</div>
+                    </div>
+                  </div>
+
+                  <div class="text-right shrink-0">
+                    <div class="num-tabular text-base font-bold text-[#f3efe9]">{formatIDR(item.price)}</div>
+                    <a
+                      href={`/products/${item.slug}`}
+                      class="text-xs font-semibold text-[#e87161] hover:underline"
+                    >
+                      Lihat Halaman
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </section>
+</Layout>
+
+<script>
+  const form = document.getElementById('admin-product-form') as HTMLFormElement | null;
+  const feedback = document.getElementById('prod-feedback');
+  const submitBtn = document.getElementById('prod-submit') as HTMLButtonElement | null;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    feedback?.classList.add('hidden');
+
+    const title = (document.getElementById('prod-title') as HTMLInputElement)?.value?.trim();
+    const type = (document.getElementById('prod-type') as HTMLSelectElement)?.value;
+    const badge = (document.getElementById('prod-badge') as HTMLInputElement)?.value?.trim();
+    const price = Number((document.getElementById('prod-price') as HTMLInputElement)?.value);
+    const originalPrice = Number((document.getElementById('prod-original') as HTMLInputElement)?.value || price);
+    const tagline = (document.getElementById('prod-tagline') as HTMLInputElement)?.value?.trim();
+    const description = (document.getElementById('prod-desc') as HTMLTextAreaElement)?.value?.trim();
+
+    if (!title || Number.isNaN(price) || price <= 0) {
+      if (feedback) {
+        feedback.className = 'p-3 rounded-xl text-xs border bg-[#301513] border-[#e87161] text-[#f3efe9]';
+        feedback.textContent = 'Mohon isi judul produk dan harga jual yang valid.';
+      }
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Menyimpan Produk...';
+    }
+
+    try {
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          type,
+          badge,
+          price,
+          original_price: originalPrice,
+          tagline,
+          description,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        if (feedback) {
+          feedback.className = 'p-3 rounded-xl text-xs border bg-[#1d2c22] border-[#3d6b4c] text-[#d1fae5]';
+          feedback.textContent = data.message || 'Produk tersimpan. Memuat ulang daftar...';
+        }
+        setTimeout(() => window.location.reload(), 650);
+        return;
+      }
+
+      if (feedback) {
+        feedback.className = 'p-3 rounded-xl text-xs border bg-[#301513] border-[#e87161] text-[#f3efe9]';
+        feedback.textContent = data.message || 'Gagal menyimpan produk.';
+      }
+    } catch {
+      if (feedback) {
+        feedback.className = 'p-3 rounded-xl text-xs border bg-[#301513] border-[#e87161] text-[#f3efe9]';
+        feedback.textContent = 'Terjadi kendala jaringan saat menyimpan produk.';
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Simpan ke Katalog';
+      }
+    }
+  });
+</script>

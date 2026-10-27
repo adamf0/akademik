@@ -1,0 +1,388 @@
+---
+import { db } from '../lib/db';
+
+const allProducts = (await db.prepare('SELECT * FROM products ORDER BY featured DESC, price DESC').all()) as any[];
+const flagshipBundle = allProducts.find((p) => p.id === 'prod_bundle_ultimate') || allProducts[0];
+const standaloneProducts = allProducts.filter((p) => p.id !== flagshipBundle?.id);
+
+const formatIDR = (val: number) =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+
+const supportFacilities = [
+  {
+    num: '02',
+    label: 'Sesi Live & Koreksi Mentor',
+    title: 'Pendampingan & Bedah Akun Intensif',
+    desc: 'Pertemuan evaluasi rutin via Zoom beserta rekaman ulang dan jalur diskusi privat 1-on-1 ketika Anda membutuhkan koreksi naskah maupun profil.',
+    image: '/acre/benefit/mentoring-insentif.webp',
+    mode: 'zoom-crop',
+  },
+  {
+    num: '03',
+    label: 'Alat Bantu Produksi Internal',
+    title: 'Asisten Riset Khusus Kreator (Montez AI)',
+    desc: 'Ruang kerja AI internal untuk mempercepat pemetaan sudut pandang konten, variasi kalimat pembuka 3 detik, dan kerangka naskah harian.',
+    image: '/acre/benefit/montez-ai.webp',
+    mode: 'montez-contain',
+  },
+  {
+    num: '04',
+    label: 'Lingkungan Belajar Aktif',
+    title: 'Ekosistem Komunitas Discord Sejak 2019',
+    desc: 'Ruang diskusi harian lintas kota dan profesi untuk bertukar umpan balik konten, tren algoritma terbaru, serta peluang kolaborasi.',
+    image: '/acre/benefit/ekosistem-suportif.webp',
+    mode: 'discord-crop',
+  },
+  {
+    num: '05',
+    label: 'Jejaring Tatap Muka',
+    title: 'Pertemuan Komunitas & Diskusi Offline',
+    desc: 'Kesempatan memperluas jejaring nyata bersama sesama kreator, pemilik bisnis, dan jajaran mentor dalam agenda kumpul komunitas.',
+    image: '/acre/benefit/offline-item.webp',
+    mode: 'deck-contain',
+  },
+];
+
+const fitCriteria = [
+  'Ingin membangun aset distribusi organik jangka panjang untuk karir, keahlian profesional, atau bisnis sendiri.',
+  'Bersedia menyisihkan minimal 60 menit per hari untuk mempelajari modul, menulis naskah, dan mengunggah konten secara konsisten.',
+  'Terbuka terhadap evaluasi objektif dari mentor mengenai kualitas kalimat pembuka, struktur cerita, dan positioning akun.',
+  'Mengincar penghasilan dari keahlian dan produk bernilai nyata, bukan sekadar mengejar angka tayangan kosong.',
+];
+
+const notFitCriteria = [
+  'Mencari jalan pintas beli pengikut bot, skema cepat kaya tanpa produksi karya, atau trik manipulatif sesaat.',
+  'Enggan merekam maupun menulis satu pun konten dalam 30 hari pertama namun menuntut hasil instan.',
+  'Menolak mengevaluasi data retensi penonton ketika sebuah video belum bekerja sesuai harapan.',
+];
+
+const bundleSavings = flagshipBundle
+  ? Math.round(((flagshipBundle.original_price - flagshipBundle.price) / flagshipBundle.original_price) * 100)
+  : 67;
+---
+
+<section class="bg-[#121110] py-20 lg:py-28">
+  <div class="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-12">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end mb-12" data-reveal>
+      <div class="lg:col-span-7">
+        <h2 class="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-bold uppercase leading-[0.98] text-[#f3efe9]">
+          Seluruh Perangkat Belajar, Koreksi Mentor, dan Jejaring dalam Satu Rumah
+        </h2>
+      </div>
+      <div class="lg:col-span-5">
+        <p class="text-[15px] sm:text-base text-[#b5aea4] leading-relaxed">
+          Kami tidak menjual sekadar rekaman video lalu meninggalkan Anda. Setiap anggota memperoleh kurikulum hidup, alat bantu penulisan naskah, serta ruang konsultasi langsung.
+        </p>
+      </div>
+    </div>
+
+    <div class="surface-bezel mb-6" data-reveal>
+      <div class="surface-bezel-inner overflow-hidden p-6 sm:p-8 lg:p-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-5 space-y-4">
+            <div class="flex items-center gap-3 num-tabular">
+              <span class="font-display text-2xl font-bold text-[#e87161]">01</span>
+              <span class="text-xs font-semibold uppercase tracking-wider text-[#9e968c]">Kurikulum Utama Member Area</span>
+            </div>
+            <h3 class="font-display text-3xl sm:text-4xl font-bold uppercase leading-[1.04] text-[#f3efe9]">
+              500+ Video Kurikulum Terstruktur di 9 Jalur Kompetensi
+            </h3>
+            <p class="text-sm sm:text-[15px] text-[#e8e2da] leading-relaxed">
+              Materi tersusun runtut dari pola pikir dasar, riset ceruk berdaya beli, produksi video pendek, personal branding, hingga peluncuran produk digital dan penentuan nilai kerja sama brand.
+            </p>
+            <div class="flex flex-wrap gap-2 pt-2">
+              <span class="rounded-lg border border-[#e8dcce]/14 bg-[#121110] px-3 py-1.5 text-xs font-medium text-[#e8e2da]">
+                Akses On-Demand Tanpa Batas Waktu
+              </span>
+              <span class="rounded-lg border border-[#e8dcce]/14 bg-[#121110] px-3 py-1.5 text-xs font-medium text-[#e8e2da]">
+                Pembaruan Materi Berkala
+              </span>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 flex items-center justify-center rounded-xl border border-[#e8dcce]/12 bg-[radial-gradient(ellipse_at_50%_55%,rgba(184,67,52,0.22),#100f0e_72%)] p-4 sm:p-6">
+            <img
+              src="/acre/benefit/kurikulum-fundamental.webp"
+              alt="Lima pilar modul kurikulum utama Akademi Creator"
+              width="1350"
+              height="654"
+              loading="lazy"
+              decoding="async"
+              class="w-full h-auto object-contain"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20" data-reveal>
+      {
+        supportFacilities.map((fac) => (
+          <article class="surface-atelier rounded-2xl overflow-hidden flex flex-col justify-between">
+            {fac.mode === 'zoom-crop' && (
+              <div class="relative aspect-[968/644] w-full overflow-hidden bg-[#0e0d0c] border-b border-[rgba(232,220,206,0.1)]">
+                <img
+                  src={fac.image}
+                  alt={fac.title}
+                  width="1338"
+                  height="728"
+                  loading="lazy"
+                  decoding="async"
+                  class="absolute left-0 top-0 w-[138.22%] max-w-none h-auto"
+                />
+              </div>
+            )}
+
+            {fac.mode === 'montez-contain' && (
+              <div class="aspect-[968/644] w-full flex items-center justify-center overflow-hidden bg-[#0c0c0c] p-3 sm:p-5 border-b border-[rgba(232,220,206,0.1)]">
+                <img
+                  src={fac.image}
+                  alt={fac.title}
+                  width="1257"
+                  height="632"
+                  loading="lazy"
+                  decoding="async"
+                  class="w-full h-auto object-contain rounded-lg border border-[#e8dcce]/12 shadow-[0_14px_32px_rgba(0,0,0,0.65)]"
+                />
+              </div>
+            )}
+
+            {fac.mode === 'discord-crop' && (
+              <div class="relative aspect-[968/644] w-full overflow-hidden bg-[#0e0d0c] border-b border-[rgba(232,220,206,0.1)]">
+                <img
+                  src={fac.image}
+                  alt={fac.title}
+                  width="1220"
+                  height="728"
+                  loading="lazy"
+                  decoding="async"
+                  class="absolute left-0 top-[-5%] w-[143.87%] max-w-none h-auto"
+                />
+              </div>
+            )}
+
+            {fac.mode === 'deck-contain' && (
+              <div class="aspect-[968/644] w-full flex items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_55%,rgba(184,67,52,0.20),#100f0e_72%)] p-4 sm:p-6 border-b border-[rgba(232,220,206,0.1)]">
+                <img
+                  src={fac.image}
+                  alt={fac.title}
+                  width="1347"
+                  height="654"
+                  loading="lazy"
+                  decoding="async"
+                  class="w-full h-auto object-contain"
+                />
+              </div>
+            )}
+
+            <div class="p-6 sm:p-7 flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-2.5 num-tabular">
+                  <span class="font-display text-lg font-bold text-[#e87161]">{fac.num}</span>
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-[#9e968c]">{fac.label}</span>
+                </div>
+                <h3 class="text-xl font-bold text-[#f3efe9] mb-2 leading-snug">{fac.title}</h3>
+                <p class="text-sm text-[#b5aea4] leading-relaxed">{fac.desc}</p>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-24" data-reveal>
+      <div class="rounded-2xl border border-[rgba(232,220,206,0.2)] bg-[#181614] p-6 sm:p-8">
+        <h3 class="font-display text-2xl sm:text-3xl font-bold uppercase text-[#f3efe9] mb-5">
+          Program Ini Dirancang Untuk Anda Jika
+        </h3>
+        <ul class="space-y-3.5">
+          {
+            fitCriteria.map((line) => (
+              <li class="flex items-start gap-3 text-sm sm:text-[15px] text-[#e8e2da] leading-relaxed">
+                <svg class="w-5 h-5 text-[#e87161] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>{line}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="rounded-2xl border border-[rgba(232,220,206,0.12)] bg-[#141210] p-6 sm:p-8">
+        <h3 class="font-display text-2xl sm:text-3xl font-bold uppercase text-[#b5aea4] mb-5">
+          Mohon Tunda Pendaftaran Jika Anda
+        </h3>
+        <ul class="space-y-3.5">
+          {
+            notFitCriteria.map((line) => (
+              <li class="flex items-start gap-3 text-sm sm:text-[15px] text-[#b5aea4] leading-relaxed">
+                <svg class="w-5 h-5 text-[#9e968c] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span>{line}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="mt-6 pt-5 border-t border-[rgba(232,220,206,0.1)] text-xs sm:text-sm text-[#9e968c] leading-relaxed">
+          Kejujuran di awal menjaga kualitas ruang diskusi bersama mentor agar tetap dipenuhi kreator yang benar-benar berkarya.
+        </p>
+      </div>
+    </div>
+
+    <div id="paket" class="mb-10" data-reveal>
+      <h2 class="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-bold uppercase leading-[0.98] text-[#f3efe9] max-w-3xl mb-3">
+        Pilih Jalur Belajar Sesuai Target Eksekusi Anda
+      </h2>
+      <p class="text-[15px] sm:text-base text-[#b5aea4] max-w-2xl">
+        Ambil paket terpadu untuk menghemat {bundleSavings}% seluruh ekosistem, atau mulai dari modul dan buku satuan di katalog kanan.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start" data-reveal>
+      {
+        flagshipBundle && (
+          <div class="lg:col-span-7 surface-bezel">
+            <div class="surface-bezel-inner p-6 sm:p-9 relative overflow-hidden">
+              <div class="flex flex-wrap items-center justify-between gap-3 pb-6 mb-6 border-b border-[rgba(232,220,206,0.14)]">
+                <div>
+                  <span class="inline-block px-3 py-1 rounded-md bg-[#b84334] text-white text-xs font-bold uppercase tracking-wider mb-2">
+                    Paket Terpadu Paling Lengkap / Hemat {bundleSavings}%
+                  </span>
+                  <h3 class="text-2xl sm:text-3xl font-bold text-[#f3efe9] leading-tight">
+                    {flagshipBundle.title}
+                  </h3>
+                </div>
+              </div>
+
+              <p class="text-[15px] text-[#e8e2da] leading-relaxed mb-6">
+                {flagshipBundle.description}
+              </p>
+
+              <div class="rounded-xl border border-[rgba(232,220,206,0.14)] bg-[#121110] p-4 sm:p-5 mb-6 space-y-3">
+                <div class="flex items-center justify-between gap-4 text-sm">
+                  <span class="text-[#e8e2da]">1. Kelas Akselerator 0 ke 100K Followers (9 Modul, 500+ Video)</span>
+                  <span class="num-tabular shrink-0 text-[#9e968c] line-through">Rp 1.250.000</span>
+                </div>
+                <div class="flex items-center justify-between gap-4 text-sm">
+                  <span class="text-[#e8e2da]">2. Kelas Digital Product &amp; Webinar Hack</span>
+                  <span class="num-tabular shrink-0 text-[#9e968c] line-through">Rp 750.000</span>
+                </div>
+                <div class="flex items-center justify-between gap-4 text-sm">
+                  <span class="text-[#e8e2da]">3. E-Book Interaktif The Art of Story Telling (50 Pola Hook)</span>
+                  <span class="num-tabular shrink-0 text-[#9e968c] line-through">Rp 299.000</span>
+                </div>
+                <div class="flex items-center justify-between gap-4 text-sm pt-2 border-t border-[rgba(232,220,206,0.1)]">
+                  <span class="text-[#f3efe9] font-semibold">4. Ruang Konsultasi Privat 1-on-1 bersama Aldio Ogut</span>
+                  <span class="text-[#e87161] shrink-0 font-semibold text-xs uppercase tracking-wider">Termasuk</span>
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pt-2">
+                <div>
+                  <div class="text-xs text-[#9e968c] mb-1">
+                    Nilai normal gabungan <span class="num-tabular line-through">{formatIDR(flagshipBundle.original_price)}</span>
+                  </div>
+                  <div class="flex items-baseline gap-3">
+                    <span class="num-tabular font-display text-4xl sm:text-5xl font-bold text-[#f3efe9]">
+                      {formatIDR(flagshipBundle.price)}
+                    </span>
+                    <span class="text-xs text-[#b5aea4]">sekali bayar, akses materi penuh</span>
+                  </div>
+                  <p class="mt-2 text-xs text-[#e87161]">
+                    Gunakan kode kupon <strong class="font-mono text-[#f3efe9]">CREATOR100K</strong> saat checkout untuk potongan langsung Rp 100.000.
+                  </p>
+                </div>
+
+                <div class="flex flex-col sm:items-end gap-2.5 shrink-0">
+                  <a
+                    href={`/checkout?product=${flagshipBundle.id}&voucher=CREATOR100K`}
+                    class="btn-crimson min-h-12 px-7 py-3.5 rounded-xl font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 whitespace-nowrap"
+                  >
+                    <span>Ambil Paket Full-Stack</span>
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6l6 6-6 6" />
+                    </svg>
+                  </a>
+                  <a
+                    href={`/products/${flagshipBundle.slug}`}
+                    class="text-xs text-[#b5aea4] hover:text-[#f3efe9] underline underline-offset-4 py-1"
+                  >
+                    Baca rincian kurikulum paket ini
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      <div class="lg:col-span-5 space-y-4">
+        <div class="flex items-center justify-between px-1">
+          <h3 class="text-base font-bold text-[#f3efe9]">Program &amp; Buku Satuan</h3>
+          <a href="/products" class="text-sm font-semibold text-[#e87161] hover:underline">
+            Lihat Semua Katalog
+          </a>
+        </div>
+
+        {
+          standaloneProducts.map((item) => (
+            <article class="surface-atelier rounded-xl p-5 transition-colors hover:border-[#736b63]">
+              <div class="flex items-start gap-4">
+                <img
+                  src={item.cover_image || '/acre/curriculum/fast-track.webp'}
+                  alt={item.title}
+                  width="76"
+                  height="135"
+                  loading="lazy"
+                  decoding="async"
+                  class="w-16 sm:w-[74px] aspect-[9/16] rounded-lg object-cover object-top border border-[rgba(232,220,206,0.16)] shrink-0 bg-[#0e0d0c] shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
+                />
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <span class="text-[11px] uppercase tracking-wider font-semibold text-[#e87161]">
+                      {item.type === 'book' ? 'Buku & E-Book' : 'Kelas Intensif'}
+                    </span>
+                    {item.badge && (
+                      <span class="text-[11px] px-2 py-0.5 rounded bg-[#221f1c] text-[#b5aea4] border border-[rgba(232,220,206,0.12)]">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <h4 class="text-base font-bold text-[#f3efe9] leading-snug line-clamp-2 mb-1.5">
+                    <a href={`/products/${item.slug}`} class="hover:text-[#e87161] transition-colors">
+                      {item.title}
+                    </a>
+                  </h4>
+                  <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+                    <div class="flex items-baseline gap-2">
+                      <span class="num-tabular text-lg font-bold text-[#f3efe9]">{formatIDR(item.price)}</span>
+                      {item.original_price > item.price && (
+                        <span class="num-tabular text-xs text-[#9e968c] line-through">{formatIDR(item.original_price)}</span>
+                      )}
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <a
+                        href={`/products/${item.slug}`}
+                        class="min-h-11 px-3 inline-flex items-center text-xs font-semibold text-[#b5aea4] hover:text-[#f3efe9]"
+                      >
+                        Detail
+                      </a>
+                      <a
+                        href={`/checkout?product=${item.id}`}
+                        class="btn-outline-warm min-h-11 px-3.5 inline-flex items-center rounded-lg text-xs font-semibold"
+                      >
+                        Pilih Program
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>

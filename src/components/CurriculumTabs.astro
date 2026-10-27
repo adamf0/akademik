@@ -1,0 +1,292 @@
+---
+const tracks = [
+  {
+    id: 'fast-track',
+    num: '01',
+    title: 'Fast Track Creator',
+    duration: '15 Hari Terpandu · 15+ Video Inti',
+    summary: 'Peta jalan harian selama 15 hari pertama agar Anda tidak bingung harus mulai dari mana, lengkap dari riset ide pertama hingga unggahan perdana.',
+    deliverables: [
+      'Kalender eksekusi harian hari ke-1 sampai hari ke-15',
+      'Audit kesalahan fatal akun baru yang menahan tayangan di angka 200 views',
+      'Rumus produksi cepat hanya dengan ponsel dan cahaya ruang kerja',
+    ],
+    image: '/acre/curriculum/fast-track.webp',
+    lessonHref: '/classroom/prod_course_100k/les_100k_1',
+  },
+  {
+    id: 'fundamental',
+    num: '02',
+    title: 'Fundamental Perilaku Manusia',
+    duration: '64 Video Materi · Lembar Kerja Positioning',
+    summary: 'Membedah psikologi atensi manusia, pemetaan ceruk pasar berdaya beli (Audience-Centric), dan fondasi mental seorang creatorpreneur.',
+    deliverables: [
+      'Matriks pemilihan ceruk pasar yang siap membeli produk digital',
+      'Psikologi pemicu rasa ingin tahu, validasi emosi, dan berbagi sosial',
+      'Cara membangun otoritas sekalipun memulai dari nol pengikut',
+    ],
+    image: '/acre/curriculum/fundamental.webp',
+    lessonHref: '/classroom/prod_course_100k/les_100k_2',
+  },
+  {
+    id: 'ig-tiktok',
+    num: '03',
+    title: 'Instagram & TikTok Growth',
+    duration: '85+ Video Taktis · Bedah Akun',
+    summary: 'Strategi organik menguasai dua ekosistem video pendek terbesar melalui anatomi pembuka 3 detik, struktur cerita, dan pembacaan analitik.',
+    deliverables: [
+      '15 pola pembuka video (hook) beretensi di atas 65%',
+      'Arsitektur naskah 45 detik dan teknik penyuntingan ritme cepat',
+      'Strategi distribusi lintas platform tanpa mengorbankan kualitas',
+    ],
+    image: '/acre/curriculum/instagram-tiktok.webp',
+    lessonHref: '/classroom/prod_course_100k/les_100k_4',
+  },
+  {
+    id: 'ai-workflow',
+    num: '04',
+    title: 'Artificial Intelligence & Montez',
+    duration: '42 Video Praktik · Sistem Prompt Kreator',
+    summary: 'Memangkas waktu riset topik, penulisan kerangka naskah, dan pemetaan sudut pandang konten menggunakan asisten Montez AI khusus kreator.',
+    deliverables: [
+      'Alur riset 30 ide konten bulanan dalam satu sesi kerja 45 menit',
+      'Pengembangan variasi sudut pandang naskah tanpa terdengar kaku seperti robot',
+      'Otomasi pengolahan transkrip menjadi artikel, utas, dan materi tayang',
+    ],
+    image: '/acre/curriculum/ai.webp',
+    lessonHref: '/classroom/prod_course_100k/les_100k_5',
+  },
+  {
+    id: 'monetisasi',
+    num: '05',
+    title: 'Arsitektur Monetisasi Kreator',
+    duration: '58 Video Strategi · Kalkulator Rate Card',
+    summary: 'Mengubah perhatian penonton menjadi arus kas berlapis dari kerja sama brand, afiliasi terkurasi, konsultasi, hingga ekosistem produk sendiri.',
+    deliverables: [
+      'Penyusunan media kit profesional dan teknik negosiasi nilai kontrak brand',
+      'Peta monetisasi bertahap mulai dari 5.000 hingga 100.000 pengikut',
+      'Pemisahan konten penarik jangkauan luas vs konten pemicu transaksi',
+    ],
+    image: '/acre/curriculum/monetisasi.webp',
+    lessonHref: '/classroom/prod_course_monetisasi/les_mon_1',
+  },
+  {
+    id: 'personal-branding',
+    num: '06',
+    title: 'Personal Branding & Storytelling',
+    duration: '50+ Video · E-Book Pendamping',
+    summary: 'Membangun identitas unik yang membuat audiens mengingat nama Anda, memercayai rekomendasi Anda, dan memilih produk Anda dibanding kompetitor.',
+    deliverables: [
+      'Perumusan karakter komunikasi, narasi latar belakang, dan posisi keahlian',
+      'Teknik bercerita (storytelling) yang menyentuh kegelisahan nyata penonton',
+      'Akses penuh ke E-Book interaktif The Art of Story Telling di ruang belajar',
+    ],
+    image: '/acre/curriculum/personal-branding.webp',
+    lessonHref: '/classroom/prod_ebook_storytelling/les_eb_1',
+  },
+  {
+    id: 'digital-product-hack',
+    num: '07',
+    title: 'Digital Product Hack',
+    duration: '48 Video Produksi · Cetak Biru Peluncuran',
+    summary: 'Langkah teruji menciptakan produk digital pertama (e-book, template, kelas rekaman) dengan margin tinggi yang dapat terjual berulang kali.',
+    deliverables: [
+      'Validasi ide produk dari 20 pertanyaan nyata di kolom komentar audiens',
+      'Penyusunan kurikulum kelas mini atau buku panduan dalam 14 hari',
+      'Penentuan struktur harga dan paket bundling bernilai tinggi',
+    ],
+    image: '/acre/curriculum/digital-product-hack.webp',
+    lessonHref: '/classroom/prod_course_monetisasi/les_mon_1',
+  },
+  {
+    id: 'webinar-hack',
+    num: '08',
+    title: 'Webinar Hack',
+    duration: '36 Video Konversi · Struktur Presentasi',
+    summary: 'Rahasia menyelenggarakan sesi kelas langsung (live webinar) yang edukatif sekaligus mampu mencetak konversi penjualan puluhan hingga ratusan juta rupiah.',
+    deliverables: [
+      'Susunan alur presentasi 90 menit dari pembukaan hingga penawaran program',
+      'Manajemen registrasi peserta, pengingat hadir, dan tindak lanjut pasca-acara',
+      'Studi kasus alumni yang meraih 20 juta hingga 115 juta rupiah dari kelas online',
+    ],
+    image: '/acre/curriculum/webinar-hack.webp',
+    lessonHref: '/classroom/prod_course_monetisasi/les_mon_1',
+  },
+  {
+    id: 'digital-marketing',
+    num: '09',
+    title: 'Digital Product Marketing',
+    duration: '44 Video Distribusi · Funnel Penjualan',
+    summary: 'Menggabungkan trafik konten organik dengan halaman penawaran yang tajam agar penjualan produk digital berjalan stabil setiap minggu.',
+    deliverables: [
+      'Anatomi halaman produk yang menjawab keraguan calon pembeli secara jujur',
+      'Strategi peluncuran berkala, kupon apresiasi, dan retensi komunitas pembeli',
+      'Evaluasi rasio konversi dari tayangan profil hingga transaksi lunas',
+    ],
+    image: '/acre/curriculum/digital-marketing.webp',
+    lessonHref: '/classroom/prod_course_100k/les_100k_3',
+  },
+];
+---
+
+<section id="kurikulum" data-reveal class="border-b border-[#e8dcce]/12 bg-[#121110] py-16 sm:py-20 lg:py-28">
+  <div class="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-12">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-2xl">
+        <h2 class="font-display text-[clamp(2.25rem,4.8vw,3.75rem)] font-bold uppercase leading-[1.02] text-[#f3efe9]">
+          KURIKULUM PRAKTIS <span class="text-[#e87161]">9 JALUR KOMPETENSI</span>
+        </h2>
+        <p class="mt-3 text-[16px] sm:text-[17px] leading-relaxed text-[#b5aea4]">
+          Seluruh 500+ video pembelajaran tersusun rapi di dalam member area. Anda bebas menjeda, mengulang, dan langsung mempraktikkan setiap modul dari ponsel maupun laptop.
+        </p>
+      </div>
+      <a
+        href="/classroom/prod_course_100k/les_100k_1"
+        class="btn-outline-warm inline-flex min-h-[46px] shrink-0 items-center justify-center rounded-xl px-5 text-[14px] font-semibold self-start lg:self-auto"
+      >
+        Coba Masuk Ruang Belajar LMS
+      </a>
+    </div>
+
+    <div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-12">
+      <div
+        role="tablist"
+        aria-label="Daftar 9 modul kurikulum Akademi Creator"
+        class="lg:col-span-5 flex flex-col gap-2"
+      >
+        {tracks.map((track, idx) => (
+          <button
+            type="button"
+            role="tab"
+            id={`curr-tab-${track.id}`}
+            aria-selected={idx === 0 ? 'true' : 'false'}
+            aria-controls={`curr-panel-${track.id}`}
+            data-curr-trigger={track.id}
+            class={`group flex min-h-[54px] w-full items-center justify-between gap-4 rounded-xl border px-4 py-3 text-left transition-all ${
+              idx === 0
+                ? 'border-[#e87161] bg-[#201a18] text-[#f3efe9]'
+                : 'border-[#e8dcce]/12 bg-[#161412] text-[#b5aea4] hover:border-[#e8dcce]/28 hover:text-[#f3efe9]'
+            }`}
+          >
+            <span class="flex items-center gap-3.5 min-w-0">
+              <span class="font-display text-[20px] font-bold num-tabular text-[#e87161] shrink-0">{track.num}</span>
+              <span class="text-[15px] font-semibold truncate">{track.title}</span>
+            </span>
+            <span class="text-[12px] font-medium text-[#9e968c] hidden sm:inline shrink-0">Lihat Modul</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="lg:col-span-7">
+        {tracks.map((track, idx) => (
+          <div
+            role="tabpanel"
+            id={`curr-panel-${track.id}`}
+            aria-labelledby={`curr-tab-${track.id}`}
+            data-curr-panel={track.id}
+            class={idx === 0 ? 'block' : 'hidden'}
+          >
+            <div class="surface-bezel">
+              <div class="surface-bezel-inner overflow-hidden p-6 sm:p-8 lg:p-10">
+                <div class="grid grid-cols-1 gap-7 md:grid-cols-12 md:items-center">
+                  <div class="md:col-span-5 flex items-center justify-center rounded-xl border border-[#e8dcce]/14 bg-gradient-to-b from-[#1d1916] to-[#11100f] p-4 sm:p-5">
+                    <img
+                      src={track.image}
+                      alt={`Sampul modul ${track.title}`}
+                      width="270"
+                      height="483"
+                      loading="lazy"
+                      class="max-h-[390px] w-auto rounded-lg object-contain shadow-[0_22px_48px_rgba(0,0,0,0.68)]"
+                    />
+                  </div>
+
+                  <div class="md:col-span-7 space-y-5">
+                    <div class="flex flex-wrap items-center gap-2.5 text-[12px] font-semibold uppercase tracking-wider text-[#e87161] num-tabular">
+                      <span>Modul {track.num}</span>
+                      <span aria-hidden="true" class="text-[#e8dcce]/25">·</span>
+                      <span class="text-[#b5aea4]">{track.duration}</span>
+                    </div>
+
+                    <h3 class="font-display text-[32px] sm:text-[38px] font-bold uppercase leading-[1.05] text-[#f3efe9]">
+                      {track.title}
+                    </h3>
+
+                    <p class="text-[15px] leading-relaxed text-[#e8e2da]">
+                      {track.summary}
+                    </p>
+
+                    <ul class="space-y-2.5 border-t border-[#e8dcce]/12 pt-4">
+                      {track.deliverables.map((item) => (
+                        <li class="flex items-start gap-3 text-[14px] leading-snug text-[#b5aea4]">
+                          <svg class="mt-0.5 h-4 w-4 shrink-0 text-[#e87161]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div class="pt-2 flex flex-wrap items-center gap-3">
+                      <a
+                        href={track.lessonHref}
+                        class="btn-crimson inline-flex min-h-[46px] items-center justify-center rounded-xl px-5 text-[14px] font-semibold"
+                      >
+                        Buka Sampel Materi Ini
+                      </a>
+                      <a
+                        href="#paket"
+                        class="btn-outline-warm inline-flex min-h-[46px] items-center justify-center rounded-xl px-4 text-[14px] font-medium"
+                      >
+                        Dapatkan Akses Penuh
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    const triggers = Array.from(document.querySelectorAll('[data-curr-trigger]'));
+    const panels = Array.from(document.querySelectorAll('[data-curr-panel]'));
+    if (!triggers.length) return;
+
+    function activate(id, moveFocus = false) {
+      triggers.forEach((btn) => {
+        const active = btn.getAttribute('data-curr-trigger') === id;
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        btn.classList.toggle('border-[#e87161]', active);
+        btn.classList.toggle('bg-[#201a18]', active);
+        btn.classList.toggle('text-[#f3efe9]', active);
+        btn.classList.toggle('border-[#e8dcce]/12', !active);
+        btn.classList.toggle('bg-[#161412]', !active);
+        btn.classList.toggle('text-[#b5aea4]', !active);
+        if (active && moveFocus) btn.focus();
+      });
+      panels.forEach((panel) => {
+        panel.classList.toggle('hidden', panel.getAttribute('data-curr-panel') !== id);
+      });
+    }
+
+    triggers.forEach((btn, idx) => {
+      btn.addEventListener('click', () => activate(btn.getAttribute('data-curr-trigger')));
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          const next = triggers[(idx + 1) % triggers.length];
+          activate(next.getAttribute('data-curr-trigger'), true);
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const prev = triggers[(idx - 1 + triggers.length) % triggers.length];
+          activate(prev.getAttribute('data-curr-trigger'), true);
+        }
+      });
+    });
+  })();
+</script>

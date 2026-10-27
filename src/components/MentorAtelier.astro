@@ -1,0 +1,195 @@
+---
+const mentors = [
+  {
+    id: 'ogut',
+    name: 'Aldio Ogut',
+    role: 'Founder & Head Mentor',
+    handle: '@mudacumasekali',
+    img: '/acre/mentors/ogut.webp',
+    credentials: '500K+ Followers Instagram & TikTok · 245K+ Subscribers YouTube · Founder Akademi Creator sejak 2019',
+    focus: 'Psikologi perilaku manusia, fundamental creatorpreneurship, dan arsitektur bisnis produk digital jangka panjang.',
+  },
+  {
+    id: 'shifa',
+    name: 'Shifa Kelana',
+    role: 'Head Mentor',
+    handle: 'Storytelling & Brand Narrative',
+    img: '/acre/mentors/shifa-kelana.webp',
+    credentials: 'Pembicara Publik & Spesialis Komunikasi Personal Brand',
+    focus: 'Merangkai narasi cerita pendek yang emosional, komunikasi autentik di depan kamera, dan penguatan kepercayaan audiens.',
+  },
+  {
+    id: 'aries',
+    name: 'Aries Bachri',
+    role: 'Head Mentor',
+    handle: 'Multi-Account Growth Strategist',
+    img: '/acre/mentors/aries-bachri.webp',
+    credentials: 'Membangun & membesarkan @novalbachri (340K), @firdiads (263K), dan @speaklikeluke (161K)',
+    focus: 'Rekayasa retensi video pendek, validasi topik berbasis data analitik, dan replikasi pertumbuhan lintas ceruk.',
+  },
+  {
+    id: 'aldela',
+    name: 'Aldela Gunadi',
+    role: 'Head Mentor',
+    handle: 'Media Lead Akademi Creator',
+    img: '/acre/mentors/aldela.webp',
+    credentials: 'Ex-Corporate Social Media Strategist · Media Lead Akademi Creator',
+    focus: 'Manajemen produksi konten harian yang rapi, standar editorial brand korporasi untuk kreator independen, dan distribusi multi-kanal.',
+  },
+  {
+    id: 'raden',
+    name: 'Raden Muhammad',
+    role: 'Guest Mentor',
+    handle: 'Digital Product & Funnel',
+    img: '/acre/mentors/raden-muhammad.webp',
+    credentials: 'Praktisi Peluncuran Produk Digital & Strategi Konversi',
+    focus: 'Mengubah perhatian penonton organik menjadi pembeli pertama melalui penawaran yang terukur.',
+  },
+  {
+    id: 'uta',
+    name: 'Uta',
+    role: 'Guest Mentor',
+    handle: 'Creative Visual & Editing',
+    img: '/acre/mentors/uta.webp',
+    credentials: 'Praktisi Visual Retention & Short-Form Pacing',
+    focus: 'Penataan tempo potongan gambar, tata suara, dan visual pembuka yang menghentikan jari penonton.',
+  },
+  {
+    id: 'giovanni',
+    name: 'Giovanni',
+    role: 'Guest Mentor',
+    handle: 'Monetization & Campaign',
+    img: '/acre/mentors/giovanni.webp',
+    credentials: 'Praktisi Kampanye Komersial & Kemitraan Brand',
+    focus: 'Penyusunan paket kerja sama brand dan pengelolaan reputasi komersial kreator.',
+  },
+];
+---
+
+<section id="mentor" data-reveal class="border-b border-[#e8dcce]/12 bg-[#121110] py-16 sm:py-20 lg:py-28">
+  <div class="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-12">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
+      <div class="lg:col-span-7">
+        <h2 class="font-display text-[clamp(2.25rem,4.8vw,3.75rem)] font-bold uppercase leading-[1.02] text-[#f3efe9]">
+          MEET THE <span class="text-[#e87161]">MENTORS</span>
+        </h2>
+        <p class="mt-3 max-w-2xl text-[16px] sm:text-[17px] leading-relaxed text-[#b5aea4]">
+          Anda dibimbing langsung oleh praktisi yang benar-benar membangun akun ratusan ribu pengikut dan menjalankan bisnis digital aktif, bukan pengajar teori semata.
+        </p>
+      </div>
+      <div class="lg:col-span-5 lg:text-right text-[13px] text-[#9e968c]">
+        Pilih potret mentor untuk melihat rekam jejak dan spesialisasi materi yang dibawakan.
+      </div>
+    </div>
+
+    <div class="mt-10 surface-bezel">
+      <div class="surface-bezel-inner p-6 sm:p-8">
+        {mentors.map((m, idx) => (
+          <div
+            data-mentor-detail={m.id}
+            class={idx === 0 ? 'grid grid-cols-1 gap-7 md:grid-cols-12 md:items-center' : 'hidden grid-cols-1 gap-7 md:grid-cols-12 md:items-center'}
+          >
+            <div class="md:col-span-4 flex items-center justify-center rounded-xl border border-[#e8dcce]/14 bg-gradient-to-b from-[#1c1816] to-[#11100f] p-4 sm:p-5">
+              <div
+                class={
+                  m.id === 'ogut'
+                    ? 'w-full overflow-hidden rounded-xl border border-[#e8dcce]/16 bg-[#121110]'
+                    : 'aspect-[5/6] w-full max-w-[248px] overflow-hidden rounded-xl border border-[#e8dcce]/16 bg-[#121110]'
+                }
+              >
+                <img
+                  src={m.img}
+                  alt={m.name}
+                  width={m.id === 'ogut' ? '613' : '298'}
+                  height="363"
+                  loading="lazy"
+                  class="h-full w-full scale-[1.06] object-cover object-top"
+                />
+              </div>
+            </div>
+            <div class="md:col-span-8 space-y-4">
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="rounded-md border border-[#e87161]/40 bg-[#241816] px-2.5 py-1 text-[12px] font-semibold text-[#e87161]">
+                  {m.role}
+                </span>
+                <span class="text-[13px] font-medium text-[#b5aea4]">{m.handle}</span>
+              </div>
+              <h3 class="font-display text-[34px] sm:text-[42px] font-bold uppercase leading-none text-[#f3efe9]">
+                {m.name}
+              </h3>
+              <p class="text-[14px] font-semibold text-[#e8e2da] num-tabular">
+                {m.credentials}
+              </p>
+              <p class="max-w-2xl text-[15px] leading-relaxed text-[#b5aea4]">
+                {m.focus}
+              </p>
+            </div>
+          </div>
+        ))}
+
+        <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7 border-t border-[#e8dcce]/12 pt-6">
+          {mentors.map((m, idx) => (
+            <button
+              type="button"
+              data-mentor-btn={m.id}
+              aria-pressed={idx === 0 ? 'true' : 'false'}
+              class={`group overflow-hidden rounded-xl border p-2 text-left transition-all ${
+                idx === 0
+                  ? 'border-[#e87161] bg-[#211917]'
+                  : 'border-[#e8dcce]/12 bg-[#121110] hover:border-[#e8dcce]/30'
+              }`}
+            >
+              <div class="overflow-hidden rounded-lg bg-[#181614]">
+                <img
+                  src={m.img}
+                  alt={m.name}
+                  width="200"
+                  height="240"
+                  loading="lazy"
+                  data-mentor-thumb
+                  class={`aspect-[5/6] w-full scale-[1.06] object-cover transition-all duration-300 ${
+                    m.id === 'ogut' ? 'object-[58%_22%]' : 'object-top'
+                  } ${idx === 0 ? 'grayscale-0' : 'grayscale group-hover:grayscale-0'}`}
+                />
+              </div>
+              <p class="mt-2 font-display text-[16px] font-bold uppercase leading-tight text-[#f3efe9] truncate">{m.name}</p>
+              <p class="text-[11px] text-[#9e968c] truncate">{m.role}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    const btns = Array.from(document.querySelectorAll('[data-mentor-btn]'));
+    const details = Array.from(document.querySelectorAll('[data-mentor-detail]'));
+    if (!btns.length) return;
+
+    btns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-mentor-btn');
+        btns.forEach((b) => {
+          const active = b.getAttribute('data-mentor-btn') === id;
+          b.setAttribute('aria-pressed', active ? 'true' : 'false');
+          b.classList.toggle('border-[#e87161]', active);
+          b.classList.toggle('bg-[#211917]', active);
+          b.classList.toggle('border-[#e8dcce]/12', !active);
+          b.classList.toggle('bg-[#121110]', !active);
+          const img = b.querySelector('[data-mentor-thumb]');
+          if (img) {
+            img.classList.toggle('grayscale-0', active);
+            img.classList.toggle('grayscale', !active);
+          }
+        });
+        details.forEach((d) => {
+          const active = d.getAttribute('data-mentor-detail') === id;
+          d.classList.toggle('hidden', !active);
+          d.classList.toggle('grid', active);
+        });
+      });
+    });
+  })();
+</script>
