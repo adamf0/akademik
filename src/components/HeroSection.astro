@@ -190,8 +190,6 @@ const stageMentors = [
         fig.classList.toggle('brightness-[0.76]', !active);
         fig.classList.toggle('contrast-[1.08]', !active);
 
-        fig.style.zIndex = active ? '22' : '';
-
         if (active && aura) {
           const auraStyle = fig.getAttribute('data-aura');
           if (auraStyle) aura.setAttribute('style', auraStyle);
